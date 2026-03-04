@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -e
+
+# Format all staged markdown files with dprint
+staged=$(git diff --cached --name-only --diff-filter=ACM -- '*.md')
+if [ -z "$staged" ]; then
+    exit 0
+fi
+
+if ! command -v dprint &>/dev/null; then
+    echo "error: dprint not found. Install with: brew install dprint"
+    exit 1
+fi
+
+# Format and re-stage
+echo "$staged" | xargs dprint fmt
+echo "$staged" | xargs git add

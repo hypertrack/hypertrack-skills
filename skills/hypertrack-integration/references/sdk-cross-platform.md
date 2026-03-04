@@ -3,6 +3,7 @@
 This reference covers React Native, Expo, Flutter, Ionic Capacitor, and .NET MAUI. All wrap the native iOS and Android SDKs.
 
 **Important:** Each cross-platform SDK still requires native platform setup. You must complete the platform-specific steps from `sdk-ios.md` and `sdk-android.md` for:
+
 - Silent push notifications (APNs + FCM)
 - Publishable key configuration
 - Background modes (iOS)
@@ -28,12 +29,14 @@ npm install hypertrack-sdk-react-native \
 ### Native setup (required)
 
 **Android:**
+
 - Add HyperTrack Maven repository in Gradle (see `sdk-android.md`)
 - Configure ProGuard if minification is enabled
 - Set `HyperTrackPublishableKey` in AndroidManifest.xml
 - Set up FCM and upload service account key
 
 **iOS:**
+
 - Run `cd ios && pod install`
 - Enable Background Modes (Location updates + Remote notifications)
 - Add purpose strings to Info.plist
@@ -139,6 +142,7 @@ In `app.json` or `app.config.js`:
 > Rebuild the native app after changing plugin config (`npx expo prebuild`).
 
 The Expo plugin handles iOS purpose strings via `locationPermission` and `motionPermission` parameters. You still need to:
+
 - Set up push notifications for both platforms
 - Upload APNs credentials and FCM service account key to HyperTrack dashboard
 
@@ -182,6 +186,7 @@ dependencies:
 **Android:** Same as `sdk-android.md` (Maven repo, Gradle deps, FCM, publishable key).
 
 **iOS:**
+
 - Enable Background Modes
 - Add purpose strings
 - Set publishable key in Info.plist
@@ -338,6 +343,7 @@ Requires .NET MAUI 9.0+.
 ### Native setup
 
 Same native-level setup required:
+
 - **Android:** FCM service account key, publishable key in manifest
 - **iOS:** APNs key, Background Modes, purpose strings, publishable key in Info.plist
 

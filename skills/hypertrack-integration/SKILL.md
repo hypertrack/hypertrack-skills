@@ -18,12 +18,12 @@ Integrate HyperTrack location intelligence into your application. This skill cov
 
 HyperTrack tracks **workers** performing **orders** at **places**.
 
-| Concept | What it maps to | Your identifier |
-|---------|----------------|-----------------|
-| **Worker** | Your app user (nurse, driver, courier, tech) | `worker_handle` = your internal user ID |
-| **Order** | A unit of tracked work (shift, delivery, visit) | `order_handle` = your shift/job ID |
-| **Place** | A recurring destination (facility, store, site) | `place_handle` = your location ID |
-| **Ops Group** | A business division or region (optional) | `ops_group_handle` = your division ID |
+| Concept       | What it maps to                                 | Your identifier                         |
+| ------------- | ----------------------------------------------- | --------------------------------------- |
+| **Worker**    | Your app user (nurse, driver, courier, tech)    | `worker_handle` = your internal user ID |
+| **Order**     | A unit of tracked work (shift, delivery, visit) | `order_handle` = your shift/job ID      |
+| **Place**     | A recurring destination (facility, store, site) | `place_handle` = your location ID       |
+| **Ops Group** | A business division or region (optional)        | `ops_group_handle` = your division ID   |
 
 **Orders are the primary tracking mechanism.** Creating an order automatically starts tracking the assigned worker's device. Completing or cancelling it stops tracking. This is the recommended approach.
 
@@ -52,10 +52,10 @@ A JSON response (even empty `{"data":[]}`) confirms credentials work.
 
 Platform-specific. Load the appropriate reference:
 
-| Platform | Reference |
-|----------|-----------|
-| iOS (Swift/ObjC) | Read `references/sdk-ios.md` |
-| Android (Kotlin/Java) | Read `references/sdk-android.md` |
+| Platform                                                | Reference                               |
+| ------------------------------------------------------- | --------------------------------------- |
+| iOS (Swift/ObjC)                                        | Read `references/sdk-ios.md`            |
+| Android (Kotlin/Java)                                   | Read `references/sdk-android.md`        |
 | React Native, Expo, Flutter, Ionic Capacitor, .NET MAUI | Read `references/sdk-cross-platform.md` |
 
 **Every platform requires these steps — no exceptions:**
@@ -83,12 +83,12 @@ The core integration. Your backend creates orders via the HyperTrack API when wo
 
 **Key decisions:**
 
-| Decision | Guidance |
-|----------|----------|
-| **Which `track_mode`?** | `pre_shift` = risk monitoring before arrival. `on_shift` = geofence entry/exit during work. `full_shift` = both combined. |
-| **When to start tracking?** | `pre_shift`: 90–120 min before `scheduled_at`. `on_shift`: ~30 min before. `full_shift`: whenever makes sense. |
-| **Destination format?** | Use `place_handle` for recurring places. Use Point geometry + radius for one-off locations. |
-| **When to stop tracking?** | Call complete/cancel endpoint when shift ends. Use a cron for recurring shifts with known end times. |
+| Decision                    | Guidance                                                                                                                  |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Which `track_mode`?**     | `pre_shift` = risk monitoring before arrival. `on_shift` = geofence entry/exit during work. `full_shift` = both combined. |
+| **When to start tracking?** | `pre_shift`: 90–120 min before `scheduled_at`. `on_shift`: ~30 min before. `full_shift`: whenever makes sense.            |
+| **Destination format?**     | Use `place_handle` for recurring places. Use Point geometry + radius for one-off locations.                               |
+| **When to stop tracking?**  | Call complete/cancel endpoint when shift ends. Use a cron for recurring shifts with known end times.                      |
 
 → Read `references/backend-api.md` § Orders API
 
@@ -116,10 +116,10 @@ End-to-end checklist:
 
 Add clock-in/out or custom events to an order timeline from the mobile SDK:
 
-| Platform | Clock In | Clock Out |
-|----------|----------|-----------|
-| iOS/Android (native) | `HyperTrack.addGeotag(orderHandle, .clockIn, metadata)` | `HyperTrack.addGeotag(orderHandle, .clockOut, metadata)` |
-| Cross-platform (JS) | `HyperTrack.addGeotag(orderHandle, {type: "orderStatusClockIn"}, metadata)` | `HyperTrack.addGeotag(orderHandle, {type: "orderStatusClockOut"}, metadata)` |
+| Platform             | Clock In                                                                    | Clock Out                                                                    |
+| -------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| iOS/Android (native) | `HyperTrack.addGeotag(orderHandle, .clockIn, metadata)`                     | `HyperTrack.addGeotag(orderHandle, .clockOut, metadata)`                     |
+| Cross-platform (JS)  | `HyperTrack.addGeotag(orderHandle, {type: "orderStatusClockIn"}, metadata)` | `HyperTrack.addGeotag(orderHandle, {type: "orderStatusClockOut"}, metadata)` |
 
 Custom events: use `OrderStatus.Custom("event_name")` (native) or `{type: "orderStatusCustom", value: "event_name"}` (JS).
 
@@ -152,38 +152,38 @@ Find available workers near a location for backfill/assignment:
 Base URL: `https://v3.api.hypertrack.com`
 Auth: `Basic {base64(AccountID:SecretKey)}`
 
-| Action | Method | Endpoint |
-|--------|--------|----------|
-| Track orders | POST | `/orders/track` |
-| Get order timeline | GET | `/orders/{order_handle}` |
-| Update order | PATCH | `/orders/{order_handle}` |
-| Complete order | POST | `/orders/{order_handle}/complete` |
-| Cancel order | POST | `/orders/{order_handle}/cancel` |
-| List orders | GET | `/orders/` |
-| Create worker | POST | `/workers/` |
-| List workers | GET | `/workers/` |
-| Update worker | PATCH | `/workers/{worker_handle}` |
-| Set work status | POST | `/workers/{worker_handle}/work_status` |
-| Create place | POST | `/places/v1/` |
-| List places | GET | `/places/v1/` |
-| Update place | PATCH | `/places/v1/{place_handle}` |
-| Nearby search | POST | `/nearby/v4` |
-| Secure embed token | POST | `/oauth/embed-token` |
+| Action             | Method | Endpoint                               |
+| ------------------ | ------ | -------------------------------------- |
+| Track orders       | POST   | `/orders/track`                        |
+| Get order timeline | GET    | `/orders/{order_handle}`               |
+| Update order       | PATCH  | `/orders/{order_handle}`               |
+| Complete order     | POST   | `/orders/{order_handle}/complete`      |
+| Cancel order       | POST   | `/orders/{order_handle}/cancel`        |
+| List orders        | GET    | `/orders/`                             |
+| Create worker      | POST   | `/workers/`                            |
+| List workers       | GET    | `/workers/`                            |
+| Update worker      | PATCH  | `/workers/{worker_handle}`             |
+| Set work status    | POST   | `/workers/{worker_handle}/work_status` |
+| Create place       | POST   | `/places/v1/`                          |
+| List places        | GET    | `/places/v1/`                          |
+| Update place       | PATCH  | `/places/v1/{place_handle}`            |
+| Nearby search      | POST   | `/nearby/v4`                           |
+| Secure embed token | POST   | `/oauth/embed-token`                   |
 
 Full API reference: https://hypertrack.com/reference
 OpenAPI spec (when available): https://developer.hypertrack.com/openapi/hypertrack-api.json
 
 ## Critical pitfalls
 
-| Pitfall | Impact | Fix |
-|---------|--------|-----|
-| Missing silent push notifications | Tracking won't start/stop remotely | Set up APNs (iOS) + FCM (Android). **Not optional.** |
-| Wrong coordinate order | Orders created at wrong location | GeoJSON = `[longitude, latitude]`, not `[lat, lng]` |
-| Not clearing `worker_handle` on logout | Tracking continues under wrong user | Set to `""` on logout |
-| Never completing orders | Tracking never stops, battery drain | Always call complete or cancel |
-| Missing background location (Android 11+) | No tracking when app backgrounded | Request `ACCESS_BACKGROUND_LOCATION` |
-| Android battery optimization | OS kills the app silently | Whitelist app from battery saver |
-| Webhook event ordering | Events processed out of sequence | Sort by `recorded_at`, not arrival order |
-| Using deprecated track modes | Unexpected behavior | Use only `pre_shift`, `on_shift`, `full_shift` |
+| Pitfall                                   | Impact                              | Fix                                                  |
+| ----------------------------------------- | ----------------------------------- | ---------------------------------------------------- |
+| Missing silent push notifications         | Tracking won't start/stop remotely  | Set up APNs (iOS) + FCM (Android). **Not optional.** |
+| Wrong coordinate order                    | Orders created at wrong location    | GeoJSON = `[longitude, latitude]`, not `[lat, lng]`  |
+| Not clearing `worker_handle` on logout    | Tracking continues under wrong user | Set to `""` on logout                                |
+| Never completing orders                   | Tracking never stops, battery drain | Always call complete or cancel                       |
+| Missing background location (Android 11+) | No tracking when app backgrounded   | Request `ACCESS_BACKGROUND_LOCATION`                 |
+| Android battery optimization              | OS kills the app silently           | Whitelist app from battery saver                     |
+| Webhook event ordering                    | Events processed out of sequence    | Sort by `recorded_at`, not arrival order             |
+| Using deprecated track modes              | Unexpected behavior                 | Use only `pre_shift`, `on_shift`, `full_shift`       |
 
 → Full troubleshooting: Read `references/troubleshooting.md`

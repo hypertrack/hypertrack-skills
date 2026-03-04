@@ -214,16 +214,16 @@ Risk events fire when HyperTrack detects issues that may affect order fulfillmen
 
 ### Risk elements
 
-| Risk | Description |
-|------|-------------|
-| `delayed_from_scheduled_at` | Worker will be late based on `scheduled_at` |
-| `delayed_from_initial_eta` | Worker will be later than the first ETA communicated |
-| `is_offline` | Device not sending location updates |
-| `deviating_from_expected_route` | Worker going off the expected route |
-| `moving_away_from_destination` | Worker heading away from destination |
-| `in_low_battery` | Device battery may die before order completion |
-| `moving_too_slow` | Worker moving too slowly to arrive on time |
-| `in_outage` | Location outage due to user action or software issue |
+| Risk                            | Description                                          |
+| ------------------------------- | ---------------------------------------------------- |
+| `delayed_from_scheduled_at`     | Worker will be late based on `scheduled_at`          |
+| `delayed_from_initial_eta`      | Worker will be later than the first ETA communicated |
+| `is_offline`                    | Device not sending location updates                  |
+| `deviating_from_expected_route` | Worker going off the expected route                  |
+| `moving_away_from_destination`  | Worker heading away from destination                 |
+| `in_low_battery`                | Device battery may die before order completion       |
+| `moving_too_slow`               | Worker moving too slowly to arrive on time           |
+| `in_outage`                     | Location outage due to user action or software issue |
 
 ### Risk intensity
 

@@ -82,17 +82,17 @@ curl -X POST https://v3.api.hypertrack.com/places/v1/ \
 
 ### Key create parameters
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `place_handle` | No (auto-generated if omitted) | Your unique identifier for this place |
-| `geometry` | No | Point or Polygon. If omitted, address is geocoded to an approximate polygon. |
-| `radius` | No | Radius in meters (only when geometry is Point) |
-| `address` | No | Human-readable address. Used for geocoding if no geometry provided. |
-| `metadata` | No | Arbitrary JSON for filtering and enrichment |
-| `name` | No | Human-readable name |
-| `place_type` | No | Hint for geocoding: `shop`, `hospital`, `warehouse`, `office`, etc. |
-| `parkings` | No | Parking locations near the place |
-| `checkins` | No | Check-in/clock-in locations at the place |
+| Parameter      | Required                       | Description                                                                  |
+| -------------- | ------------------------------ | ---------------------------------------------------------------------------- |
+| `place_handle` | No (auto-generated if omitted) | Your unique identifier for this place                                        |
+| `geometry`     | No                             | Point or Polygon. If omitted, address is geocoded to an approximate polygon. |
+| `radius`       | No                             | Radius in meters (only when geometry is Point)                               |
+| `address`      | No                             | Human-readable address. Used for geocoding if no geometry provided.          |
+| `metadata`     | No                             | Arbitrary JSON for filtering and enrichment                                  |
+| `name`         | No                             | Human-readable name                                                          |
+| `place_type`   | No                             | Hint for geocoding: `shop`, `hospital`, `warehouse`, `office`, etc.          |
+| `parkings`     | No                             | Parking locations near the place                                             |
+| `checkins`     | No                             | Check-in/clock-in locations at the place                                     |
 
 ### List places
 
@@ -143,14 +143,14 @@ curl -X POST https://v3.api.hypertrack.com/workers/ \
 }'
 ```
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `worker_handle` | Yes | Your unique identifier (user ID, email, phone, etc.) |
-| `name` | No | Display name |
-| `profile` | No | Arbitrary JSON (skills, region, manager, etc.) |
-| `ops_group_handle` | No | Business division grouping |
-| `schedule` | No | Work schedule for auto-start/stop |
-| `home` | No | Worker home location |
+| Parameter          | Required | Description                                          |
+| ------------------ | -------- | ---------------------------------------------------- |
+| `worker_handle`    | Yes      | Your unique identifier (user ID, email, phone, etc.) |
+| `name`             | No       | Display name                                         |
+| `profile`          | No       | Arbitrary JSON (skills, region, manager, etc.)       |
+| `ops_group_handle` | No       | Business division grouping                           |
+| `schedule`         | No       | Work schedule for auto-start/stop                    |
+| `home`             | No       | Worker home location                                 |
 
 ### List workers
 
@@ -222,31 +222,33 @@ curl -X POST https://v3.api.hypertrack.com/orders/track \
 
 ### Required fields
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `track_mode` | Yes | `pre_shift`, `on_shift`, or `full_shift` |
-| `worker_handle` | Yes* | Worker to track (*or `device_id`) |
-| `orders[].order_handle` | Yes | Your unique shift/job identifier |
-| `orders[].destination` | Yes | Where the work happens |
+| Field                   | Required | Description                              |
+| ----------------------- | -------- | ---------------------------------------- |
+| `track_mode`            | Yes      | `pre_shift`, `on_shift`, or `full_shift` |
+| `worker_handle`         | Yes*     | Worker to track (*or `device_id`)        |
+| `orders[].order_handle` | Yes      | Your unique shift/job identifier         |
+| `orders[].destination`  | Yes      | Where the work happens                   |
 
 ### Track mode selection
 
-| Mode | Use case | What it does |
-|------|----------|-------------|
-| `pre_shift` | Monitor arrival risk before shift starts | Computes ETA, fires delay risks based on `scheduled_at` |
-| `on_shift` | Track time at destination during shift | Monitors geofence entry/exit, time on site |
-| `full_shift` | Combined pre + on | Both ETA monitoring and geofence tracking |
+| Mode         | Use case                                 | What it does                                            |
+| ------------ | ---------------------------------------- | ------------------------------------------------------- |
+| `pre_shift`  | Monitor arrival risk before shift starts | Computes ETA, fires delay risks based on `scheduled_at` |
+| `on_shift`   | Track time at destination during shift   | Monitors geofence entry/exit, time on site              |
+| `full_shift` | Combined pre + on                        | Both ETA monitoring and geofence tracking               |
 
 > `on_time` and `flex` are deprecated. Do not use them.
 
 ### Destination formats
 
 **Option 1: Place handle (recommended for recurring destinations)**
+
 ```json
 { "destination": { "place_handle": "bellevue-hospital-nyc" } }
 ```
 
 **Option 2: Point + radius**
+
 ```json
 {
     "destination": {
@@ -258,6 +260,7 @@ curl -X POST https://v3.api.hypertrack.com/orders/track \
 ```
 
 **Option 3: Polygon**
+
 ```json
 {
     "destination": {
@@ -279,16 +282,17 @@ curl -X POST https://v3.api.hypertrack.com/orders/track \
 
 ### Optional order fields
 
-| Field | Description |
-|-------|-------------|
-| `scheduled_at` | ISO 8601 time the worker should arrive. Enables delay risk detection. |
-| `expected_service_time` | Duration in seconds. Reference value for on-shift tracking. |
-| `metadata` | Arbitrary JSON for filtering/enrichment. |
-| `device_switch_mode` | `manual`, `login`, or `closest_to_destination` — controls multi-device behavior. |
+| Field                   | Description                                                                      |
+| ----------------------- | -------------------------------------------------------------------------------- |
+| `scheduled_at`          | ISO 8601 time the worker should arrive. Enables delay risk detection.            |
+| `expected_service_time` | Duration in seconds. Reference value for on-shift tracking.                      |
+| `metadata`              | Arbitrary JSON for filtering/enrichment.                                         |
+| `device_switch_mode`    | `manual`, `login`, or `closest_to_destination` — controls multi-device behavior. |
 
 ### Response
 
 The track endpoint returns created orders with:
+
 - `embed_url` — embeddable live tracking view
 - `share_url` — shareable tracking link
 - `route_handle` — route identifier
@@ -424,10 +428,10 @@ The response `secure_embed_url` is time-limited and safe to expose to end users.
 
 ### Embedding use cases
 
-| Application | What to embed |
-|-------------|--------------|
-| Worker app | Shift summary after clock-out (timeline, hours, mileage) |
-| Live ops dashboard | Real-time worker location + risk indicators |
-| Customer support | Shift timeline attached to support tickets |
-| Payroll/expense | Per-shift distance, time, on-time metrics |
-| Customer portal | Live pre-shift arrival view (can obfuscate route for privacy) |
+| Application        | What to embed                                                 |
+| ------------------ | ------------------------------------------------------------- |
+| Worker app         | Shift summary after clock-out (timeline, hours, mileage)      |
+| Live ops dashboard | Real-time worker location + risk indicators                   |
+| Customer support   | Shift timeline attached to support tickets                    |
+| Payroll/expense    | Per-shift distance, time, on-time metrics                     |
+| Customer portal    | Live pre-shift arrival view (can obfuscate route for privacy) |

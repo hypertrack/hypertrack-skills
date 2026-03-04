@@ -57,11 +57,11 @@ skills/hypertrack-integration/
 
 Tell your agent what you need:
 
-- *"Integrate HyperTrack into my iOS app"*
-- *"Set up shift tracking with pre-shift risk detection"*
-- *"Add HyperTrack order tracking to my Node.js backend"*
-- *"Debug why my HyperTrack worker isn't showing on the dashboard"*
-- *"Set up webhooks to detect late arrivals"*
+- _"Integrate HyperTrack into my iOS app"_
+- _"Set up shift tracking with pre-shift risk detection"_
+- _"Add HyperTrack order tracking to my Node.js backend"_
+- _"Debug why my HyperTrack worker isn't showing on the dashboard"_
+- _"Set up webhooks to detect late arrivals"_
 
 The skill routes to the appropriate reference based on your request.
 

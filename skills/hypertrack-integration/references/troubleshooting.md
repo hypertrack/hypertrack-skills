@@ -11,6 +11,7 @@ Common issues, diagnostic steps, and fixes for HyperTrack integrations.
 **Cause:** Invalid or missing AccountID/SecretKey.
 
 **Diagnose:**
+
 ```bash
 # Test credentials
 curl -s -o /dev/null -w '%{http_code}' \
@@ -19,6 +20,7 @@ curl -s -o /dev/null -w '%{http_code}' \
 ```
 
 **Fix:**
+
 - Verify AccountID and SecretKey from [Setup page](https://dashboard.hypertrack.com/setup)
 - Ensure Basic auth header is `base64(AccountID:SecretKey)` — not `base64(AccountID)` + `base64(SecretKey)` separately
 - Check for trailing whitespace or newlines in credential strings
@@ -29,6 +31,7 @@ curl -s -o /dev/null -w '%{http_code}' \
 **Cause:** Wrong key type or misconfigured.
 
 **Fix:**
+
 - Use the **Publishable Key** (not SecretKey) in the mobile SDK
 - iOS: verify `HyperTrackPublishableKey` key exists in `Info.plist` with type `String`
 - Android: verify `<meta-data android:name="HyperTrackPublishableKey" android:value="..."/>` in `AndroidManifest.xml`
@@ -67,6 +70,7 @@ curl -s -o /dev/null -w '%{http_code}' \
 **Cause (iOS):** Missing Background Modes or "Always" location permission.
 
 **Fix:**
+
 - Enable Background Modes → Location updates + Remote notifications
 - Ensure location permission is "Always", not "When In Use"
 - Verify `NSLocationAlwaysAndWhenInUseUsageDescription` is in Info.plist
@@ -74,6 +78,7 @@ curl -s -o /dev/null -w '%{http_code}' \
 **Cause (Android):** Battery optimization killing the app.
 
 **Fix:**
+
 - Whitelist app from battery saver (device-specific, see `sdk-android.md`)
 - Grant `ACCESS_BACKGROUND_LOCATION` permission (Android 11+)
 - Check `HyperTrack.errors` for "Tracking services terminated" or "SDK killed by user"
@@ -83,11 +88,13 @@ curl -s -o /dev/null -w '%{http_code}' \
 **Cause:** Silent push notifications not reaching the device.
 
 **Diagnostic:**
+
 1. Create an order via API for the worker
 2. Check dashboard — does the order show up?
 3. If order exists but device isn't tracking, push isn't reaching the device
 
 **Fix:**
+
 - **iOS:** Verify APNs key is uploaded (not expired), Push Notifications capability is enabled, and Background Modes → Remote notifications is on
 - **Android:** Verify FCM service account key is uploaded, `google-services.json` is in the app, and `push-service-firebase` dependency is included
 - As a workaround, opening the app will trigger sync and start tracking
@@ -101,14 +108,17 @@ curl -s -o /dev/null -w '%{http_code}' \
 **Cause:** Coordinates in wrong order.
 
 **Fix:** GeoJSON uses `[longitude, latitude]`:
+
 ```json
 "coordinates": [-122.394, 37.793]
 ```
+
 NOT `[37.793, -122.394]`. If your place ends up in the ocean or a different continent, coordinates are swapped.
 
 ### "422 Validation error" when creating order
 
 **Common causes:**
+
 - Missing required field (`order_handle` or `destination`)
 - `track_mode` not one of: `pre_shift`, `on_shift`, `full_shift`
 - Invalid destination geometry (malformed GeoJSON, polygon not closed)
@@ -116,6 +126,7 @@ NOT `[37.793, -122.394]`. If your place ends up in the ocean or a different cont
 - Duplicate `order_handle` for an active order (409 Conflict)
 
 **Diagnose:** The 422 response body contains validation error details. Check it:
+
 ```bash
 curl -v -X POST https://v3.api.hypertrack.com/orders/track \
   -u '{AccountID}:{SecretKey}' \
@@ -128,6 +139,7 @@ curl -v -X POST https://v3.api.hypertrack.com/orders/track \
 **Cause:** Destination geofence too small or inaccurate.
 
 **Fix:**
+
 - Increase `radius` (try 200m for testing)
 - Verify destination coordinates are correct
 - Use HyperTrack Places with auto-improving boundaries
@@ -138,6 +150,7 @@ curl -v -X POST https://v3.api.hypertrack.com/orders/track \
 **Cause:** Order was never completed or cancelled.
 
 **Fix:**
+
 - Call `POST /orders/{order_handle}/complete` or `POST /orders/{order_handle}/cancel`
 - For recurring shifts, set up a cron to complete orders at shift end time
 - Check dashboard for orphaned active orders
@@ -156,6 +169,7 @@ iOS shows "When In Use" first, then may prompt for "Always" later. If the user d
 ### Android: Background location not granted
 
 On Android 11+ (API 30+), background location is a separate permission:
+
 1. First grant fine location
 2. Then explicitly request `ACCESS_BACKGROUND_LOCATION`
 3. Some devices show "Allow all the time" only in Settings, not in the runtime dialog
@@ -163,6 +177,7 @@ On Android 11+ (API 30+), background location is a separate permission:
 ### Permissions revoked after granting
 
 Users can revoke permissions at any time. Subscribe to errors in the SDK:
+
 ```
 HyperTrack.subscribeToErrors { errors -> ... }
 ```
@@ -196,26 +211,31 @@ Retries reuse the same `x-amz-sns-message-id`. Store processed message IDs and s
 When tracking is interrupted, HyperTrack reports the reason. Common codes and categories:
 
 ### Behavioral (user action)
+
 - Location permissions denied/revoked
 - App deleted/uninstalled
 - Location services turned off
 
 ### Adversarial (fraud)
+
 - Location mocking detected
 - Time offset manipulation (device clock changed)
 
 ### Operating System
+
 - App terminated (low memory)
 - System reboot
 - OS update
 - Excessive resource usage
 
 ### Sporadic (environmental)
+
 - Low battery
 - Battery saver active
 - GPS unavailable (indoors, tunnel)
 
 ### Reachability
+
 - No internet connectivity
 - Push notification token missing/invalid
 

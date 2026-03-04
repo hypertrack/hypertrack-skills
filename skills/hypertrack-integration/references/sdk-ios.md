@@ -46,11 +46,11 @@ Also ensure **Push Notifications** capability is added in the same tab.
 
 In `Info.plist`, add these keys with user-facing descriptions explaining why location is needed:
 
-| Key | Required | Notes |
-|-----|----------|-------|
-| `NSLocationAlwaysAndWhenInUseUsageDescription` | Yes | Must request "Always" for reliable tracking |
-| `NSLocationWhenInUseUsageDescription` | Yes | Shown first before Always prompt |
-| `NSMotionUsageDescription` | Recommended | Improves activity detection in timeline |
+| Key                                            | Required    | Notes                                       |
+| ---------------------------------------------- | ----------- | ------------------------------------------- |
+| `NSLocationAlwaysAndWhenInUseUsageDescription` | Yes         | Must request "Always" for reliable tracking |
+| `NSLocationWhenInUseUsageDescription`          | Yes         | Shown first before Always prompt            |
+| `NSMotionUsageDescription`                     | Recommended | Improves activity detection in timeline     |
 
 The purpose strings should explain the value to the worker (e.g., "Location is used during your shifts to track arrival times and provide accurate shift records.").
 
@@ -65,6 +65,7 @@ Follow Apple's [APNs documentation](https://developer.apple.com/documentation/us
 ### 2. Get your APNs Auth Key
 
 Go to [Apple Developer → Keys](https://developer.apple.com/account/resources/authkeys/list):
+
 - Create a new key with Apple Push Notifications service (APNs) enabled
 - Download the `.p8` file (format: `AuthKey_KEYID.p8`)
 - Note your **Key ID** and **Team ID**
@@ -72,6 +73,7 @@ Go to [Apple Developer → Keys](https://developer.apple.com/account/resources/a
 ### 3. Upload to HyperTrack dashboard
 
 Go to [Setup page](https://dashboard.hypertrack.com/setup):
+
 - Upload the `.p8` Auth Key file
 - Enter your Team ID
 
@@ -79,8 +81,8 @@ Go to [Setup page](https://dashboard.hypertrack.com/setup):
 
 In `Info.plist`, add:
 
-| Key | Type | Value |
-|-----|------|-------|
+| Key                        | Type   | Value                                    |
+| -------------------------- | ------ | ---------------------------------------- |
 | `HyperTrackPublishableKey` | String | Your publishable key from the Setup page |
 
 ## Set worker handle
@@ -119,6 +121,7 @@ The app must have **Always** location permission for reliable tracking.
 Manual grant path: Settings → Privacy → Location Services → YourApp → Allow Location Access → **Always**
 
 Also verify:
+
 - **Location Services** toggle is on
 - **Precise Location** toggle is on
 

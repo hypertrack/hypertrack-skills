@@ -99,6 +99,7 @@ If using `minifyEnabled true`, add to `proguard-rules.pro`:
 ## Set up silent push notifications
 
 HyperTrack requires Firebase Cloud Messaging (FCM) to:
+
 - Start/stop tracking when orders are created/completed server-side
 - Wake up the app if the OS killed it
 
@@ -113,12 +114,14 @@ Follow [Firebase Android setup](https://firebase.google.com/docs/android/setup) 
 You need a JSON key for a service account with Firebase Cloud Messaging access.
 
 **Method 1 — Firebase Console (quick, broad permissions):**
+
 1. Go to Firebase Console → Project Settings → Service accounts
 2. Verify Firebase Cloud Messaging API (V1) is enabled
 3. Click "Generate new private key"
 4. Download the JSON key file
 
 **Method 2 — Fine-grained key (recommended for production):**
+
 1. Go to Firebase Console → click "Manage service account permissions"
 2. Create a new service account with **Firebase Cloud Messaging API Admin** role
 3. Wait 10–15 min for Google to provision
@@ -193,9 +196,9 @@ if (metadata != null) {
 
 Required runtime permissions:
 
-| Permission | Required | Notes |
-|-----------|----------|-------|
-| `ACCESS_FINE_LOCATION` | Yes | Core location tracking |
+| Permission                   | Required                    | Notes                                                  |
+| ---------------------------- | --------------------------- | ------------------------------------------------------ |
+| `ACCESS_FINE_LOCATION`       | Yes                         | Core location tracking                                 |
 | `ACCESS_BACKGROUND_LOCATION` | Yes (Android 11+ / API 30+) | Must request separately after fine location is granted |
 
 ### Request permissions in code
@@ -221,11 +224,13 @@ Apps that request `ACCESS_BACKGROUND_LOCATION` must submit a declaration in the 
 Many Android manufacturers (Samsung, Xiaomi, Vivo, OnePlus, OPPO) include aggressive battery savers that kill background apps. The user must whitelist your app.
 
 Common outage indicators in the dashboard:
+
 - "Tracking services terminated"
 - "SDK killed by user"
 - "Refresh status denied"
 
 **Instruct workers to whitelist the app.** Device-specific guides:
+
 - Samsung: Settings → Battery → App power management → add to "Unmonitored apps"
 - Xiaomi/Redmi: Settings → Battery → App battery saver → choose "No restrictions"
 - See https://dontkillmyapp.com for all manufacturers
