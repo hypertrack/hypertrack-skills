@@ -18,12 +18,12 @@ Integrate HyperTrack location intelligence into your application. This skill cov
 
 HyperTrack tracks **workers** performing **orders** at **places**.
 
-| Concept       | What it maps to                                 | Your identifier                         |
-| ------------- | ----------------------------------------------- | --------------------------------------- |
-| **Worker**    | Your app user (nurse, driver, courier, tech)    | `worker_handle` = your internal user ID |
-| **Order**     | A unit of tracked work (shift, delivery, visit) | `order_handle` = your shift/job ID      |
-| **Place**     | A recurring destination (facility, store, site) | `place_handle` = your location ID       |
-| **Ops Group** | A business division or region (optional)        | `ops_group_handle` = your division ID   |
+| Concept       | What it maps to                                  | Your identifier                         |
+| ------------- | ------------------------------------------------ | --------------------------------------- |
+| **Worker**    | Your app user (driver, courier, technician, rep) | `worker_handle` = your internal user ID |
+| **Order**     | A unit of tracked work (shift, delivery, visit)  | `order_handle` = your shift/job ID      |
+| **Place**     | A recurring destination (facility, store, site)  | `place_handle` = your location ID       |
+| **Ops Group** | A business division or region (optional)         | `ops_group_handle` = your division ID   |
 
 **Orders are the primary tracking mechanism.** Creating an order automatically starts tracking the assigned worker's device. Completing or cancelling it stops tracking. This is the recommended approach.
 
@@ -57,6 +57,19 @@ Platform-specific. Load the appropriate reference:
 | iOS (Swift/ObjC)                                        | Read `references/sdk-ios.md`            |
 | Android (Kotlin/Java)                                   | Read `references/sdk-android.md`        |
 | React Native, Expo, Flutter, Ionic Capacitor, .NET MAUI | Read `references/sdk-cross-platform.md` |
+
+**Get the latest SDK version** before installing. Each SDK publishes releases on GitHub:
+
+| SDK             | Latest version                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------ |
+| iOS             | `https://api.github.com/repos/hypertrack/sdk-ios/releases/latest` → `tag_name`             |
+| Android         | `https://api.github.com/repos/hypertrack/sdk-android/releases/latest` → `tag_name`         |
+| React Native    | `https://api.github.com/repos/hypertrack/sdk-react-native/releases/latest` → `tag_name`    |
+| Flutter         | `https://api.github.com/repos/hypertrack/sdk-flutter/releases/latest` → `tag_name`         |
+| Ionic Capacitor | `https://api.github.com/repos/hypertrack/sdk-ionic-capacitor/releases/latest` → `tag_name` |
+| .NET MAUI       | `https://api.github.com/repos/hypertrack/sdk-maui/releases/latest` → `tag_name`            |
+
+Fetch the `tag_name` from the GitHub API and use it wherever `<version>` appears in the install instructions.
 
 **Every platform requires these steps — no exceptions:**
 

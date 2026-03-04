@@ -48,11 +48,11 @@ curl -X POST https://v3.api.hypertrack.com/places/v1/ \
   -u '{AccountID}:{SecretKey}' \
   -H 'Content-Type: application/json' \
   -d '{
-    "place_handle": "bellevue-hospital-nyc",
-    "address": "462 First Avenue, Manhattan, New York, NY, United States",
+    "place_handle": "warehouse-seattle-001",
+    "address": "1200 Western Ave, Seattle, WA 98101, United States",
     "metadata": {
-        "workplace_id": "1GDR743",
-        "type": "hospital"
+        "site_id": "WH-001",
+        "type": "warehouse"
     }
 }'
 ```
@@ -64,16 +64,16 @@ curl -X POST https://v3.api.hypertrack.com/places/v1/ \
   -u '{AccountID}:{SecretKey}' \
   -H 'Content-Type: application/json' \
   -d '{
-    "place_handle": "safeway-seattle-77656",
+    "place_handle": "depot-north-77656",
     "geometry": {
         "type": "Point",
         "coordinates": [-122.311965, 47.718096]
     },
     "radius": 200,
-    "address": "Safeway, 12318 15th Ave NE, Seattle, WA 98125",
+    "address": "12318 15th Ave NE, Seattle, WA 98125",
     "metadata": {
         "customer_id": 77656,
-        "vendor_name": "Safeway"
+        "zone": "north"
     }
 }'
 ```
@@ -137,7 +137,7 @@ curl -X POST https://v3.api.hypertrack.com/workers/ \
     "profile": {
         "employee_id": "144223",
         "region": "northeast",
-        "skills": ["ICU", "ER"]
+        "vehicle_type": "van"
     },
     "ops_group_handle": "east-coast"
 }'
@@ -169,7 +169,7 @@ curl -X PATCH https://v3.api.hypertrack.com/workers/{worker_handle} \
   -H 'Content-Type: application/json' \
   -d '{
     "name": "James R.",
-    "profile": { "skills": ["ICU", "ER", "Pediatrics"] }
+    "profile": { "vehicle_type": "van", "region": "northeast" }
 }'
 ```
 
@@ -208,12 +208,12 @@ curl -X POST https://v3.api.hypertrack.com/orders/track \
         {
             "order_handle": "shift-2025-03-04-001",
             "destination": {
-                "place_handle": "bellevue-hospital-nyc"
+                "place_handle": "warehouse-seattle-001"
             },
             "scheduled_at": "2025-03-04T14:00:00Z",
             "metadata": {
                 "shift_type": "day",
-                "department": "ICU"
+                "zone": "north"
             }
         }
     ]
@@ -244,7 +244,7 @@ curl -X POST https://v3.api.hypertrack.com/orders/track \
 **Option 1: Place handle (recommended for recurring destinations)**
 
 ```json
-{ "destination": { "place_handle": "bellevue-hospital-nyc" } }
+{ "destination": { "place_handle": "warehouse-seattle-001" } }
 ```
 
 **Option 2: Point + radius**
@@ -254,7 +254,7 @@ curl -X POST https://v3.api.hypertrack.com/orders/track \
     "destination": {
         "geometry": { "type": "Point", "coordinates": [-73.976, 40.739] },
         "radius": 200,
-        "address": "462 First Avenue, New York, NY"
+        "address": "1200 Western Ave, Seattle, WA 98101"
     }
 }
 ```

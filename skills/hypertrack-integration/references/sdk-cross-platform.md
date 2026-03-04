@@ -60,8 +60,9 @@ HyperTrack.setWorkerHandle("");
 ```javascript
 HyperTrack.setName("Jane Smith");
 HyperTrack.setMetadata({
-    department: "nursing",
-    skills: ["ICU", "ER"]
+    department: "delivery",
+    vehicle_type: "van",
+    zone: "northeast"
 });
 ```
 
@@ -255,7 +256,7 @@ HyperTrack.workerHandle = "";              // logout
 ```dart
 HyperTrack.setName("Jane Smith");
 HyperTrack.setMetadata(JSONObject({
-    "department": JSONString("nursing"),
+    "department": JSONString("delivery"),
 }));
 ```
 
@@ -298,7 +299,7 @@ import HyperTrack from 'hypertrack-sdk-ionic-capacitor';
 
 HyperTrack.setWorkerHandle("your_user_id");
 HyperTrack.setName("Jane Smith");
-HyperTrack.setMetadata({ department: "nursing" });
+HyperTrack.setMetadata({ department: "delivery" });
 
 // Errors
 const errors = await HyperTrack.getErrors();
@@ -359,8 +360,8 @@ HyperTrack.SetWorkerHandle("");
 // Name + metadata
 HyperTrack.Name = "Jane Smith";
 HyperTrack.Metadata = HyperTrack.Json.FromDictionary(new Dictionary<string, object> {
-    { "department", "nursing" },
-    { "skills", new[] { "ICU" } }
+    { "department", "delivery" },
+    { "vehicle_type", "van" }
 })!;
 
 // Error handling

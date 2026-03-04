@@ -106,9 +106,9 @@ HyperTrack.workerHandle = ""
 ```swift
 HyperTrack.name = "Jane Smith"
 HyperTrack.metadata = [
-    "department": "nursing",
-    "skills": ["ICU", "ER"],
-    "home_address": "123 Main St"
+    "department": "delivery",
+    "vehicle_type": "van",
+    "zone": "northeast"
 ]
 ```
 
