@@ -1,0 +1,22 @@
+{
+    "name": "hypertrack-skills",
+    "version": "0.1.0",
+    "description": "HyperTrack integration skills for coding agents",
+    "keywords": [
+        "pi-package",
+        "hypertrack",
+        "location-tracking",
+        "agent-skills"
+    ],
+    "pi": {
+        "skills": [
+            "./skills"
+        ]
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/hypertrack/hypertrack-skills.git"
+    },
+    "license": "MIT",
+    "author": "HyperTrack"
+}
