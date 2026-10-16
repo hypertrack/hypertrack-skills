@@ -19,15 +19,7 @@ npx skills add hypertrack/hypertrack-skills
 
 It detects the coding agents you have installed and adds the skill to the current project. Add `-g` to install it for all your projects instead. Update later with `npx skills update`.
 
-### Pi package
-
-```bash
-pi install git:github.com/hypertrack/hypertrack-skills
-```
-
-### Manual install
-
-Copy or symlink `skills/hypertrack-integration/` into your agent's skills directory.
+To install by hand instead, copy or symlink `skills/hypertrack-integration/` into your agent's skills directory.
 
 ## Skill structure
 
