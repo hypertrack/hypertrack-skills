@@ -155,8 +155,10 @@ The response `secure_embed_url` can be safely embedded in iframes.
 
 Find available workers near a location for backfill/assignment:
 
-1. Workers must have `isAvailable = true` set via SDK
+1. Make workers available: on-device via SDK `isAvailable` (for example, from a worker-facing "available for nearby work" toggle), or server-side via the `work_status` API (for example, on a schedule)
 2. Call `POST /nearby/v4` with destination coordinates and `search_type` (`region` or `eta`)
+
+Server-side availability changes currently don't propagate to the device: HyperTrack's record updates, but the SDK isn't told, so it won't start collecting the locations Nearby searches. Don't expect a `work_status` change to make a worker show up with a fresh location; when the device needs to react, set availability on-device.
 
 → Read `references/backend-api.md` § Nearby API
 
@@ -188,15 +190,16 @@ OpenAPI spec (when available): https://developer.hypertrack.com/openapi/hypertra
 
 ## Critical pitfalls
 
-| Pitfall                                   | Impact                              | Fix                                                  |
-| ----------------------------------------- | ----------------------------------- | ---------------------------------------------------- |
-| Missing silent push notifications         | Tracking won't start/stop remotely  | Set up APNs (iOS) + FCM (Android). **Not optional.** |
-| Wrong coordinate order                    | Orders created at wrong location    | GeoJSON = `[longitude, latitude]`, not `[lat, lng]`  |
-| Not clearing `worker_handle` on logout    | Tracking continues under wrong user | Set to `""` on logout                                |
-| Never completing orders                   | Tracking never stops, battery drain | Always call complete or cancel                       |
-| Missing background location (Android 11+) | No tracking when app backgrounded   | Request `ACCESS_BACKGROUND_LOCATION`                 |
-| Android battery optimization              | OS kills the app silently           | Whitelist app from battery saver                     |
-| Webhook event ordering                    | Events processed out of sequence    | Sort by `recorded_at`, not arrival order             |
-| Using deprecated track modes              | Unexpected behavior                 | Use only `pre_shift`, `on_shift`, `full_shift`       |
+| Pitfall                                                          | Impact                                                       | Fix                                                        |
+| ---------------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------- |
+| Missing silent push notifications                                | Tracking won't start/stop remotely                           | Set up APNs (iOS) + FCM (Android). **Not optional.**       |
+| Wrong coordinate order                                           | Orders created at wrong location                             | GeoJSON = `[longitude, latitude]`, not `[lat, lng]`        |
+| Not clearing `worker_handle` on logout                           | Tracking continues under wrong user                          | Set to `""` on logout                                      |
+| Never completing orders                                          | Tracking never stops, battery drain                          | Always call complete or cancel                             |
+| Missing background location (Android 11+)                        | No tracking when app backgrounded                            | Request `ACCESS_BACKGROUND_LOCATION`                       |
+| Android battery optimization                                     | OS kills the app silently                                    | Whitelist app from battery saver                           |
+| Webhook event ordering                                           | Events processed out of sequence                             | Sort by `recorded_at`, not arrival order                   |
+| Using deprecated track modes                                     | Unexpected behavior                                          | Use only `pre_shift`, `on_shift`, `full_shift`             |
+| Expecting backend `work_status` availability to reach the device | Device doesn't start reporting; no fresh location for Nearby | Set `isAvailable` on-device when the device needs to react |
 
 → Full troubleshooting: Read `references/troubleshooting.md`

@@ -364,7 +364,7 @@ For workers at the same place on multiple days (e.g., Apr 1–15):
 
 Find available workers near a work location for backfill or on-demand assignment.
 
-**Prerequisites:** Workers must have `isAvailable = true` set via the SDK.
+**Prerequisites:** Workers must be available, set either on-device via SDK `isAvailable` (for example, from a worker-facing toggle) or server-side via the `work_status` API (for example, on a schedule). Server-side changes currently don't propagate to the device: HyperTrack's record updates, but the SDK isn't told, so it won't start collecting the locations Nearby searches. When the device needs to react, set availability on-device.
 
 ### Region search (by distance)
 
