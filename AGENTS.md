@@ -20,7 +20,7 @@ hypertrack-skills/
 ├── AGENTS.md                         # This file
 ├── VISION.md                         # Direction and goals
 ├── TODO.md                           # Next priorities
-└── package.json                      # Pi package + npm metadata
+└── package.json                      # Pi package manifest
 ```
 
 ## How the skill works
@@ -49,7 +49,6 @@ hypertrack-skills/
 
 ## Distribution
 
-- **Pi:** `pi install git:github.com/hypertrack/hypertrack-skills`
-- **npm:** publish `hypertrack-skills` package (uses `package.json` with `pi.skills` manifest)
-- **Claude Code / Cursor / others:** clone to agent skills directory
-- **Manual:** point agent at `skills/hypertrack-integration/SKILL.md`
+- **skills CLI:** `npx skills add hypertrack/hypertrack-skills` (Claude Code, Codex, Cursor, Pi, and other Agent Skills agents)
+- **Pi package:** `pi install git:github.com/hypertrack/hypertrack-skills` (uses the `pi.skills` manifest in `package.json`)
+- **Manual:** copy or symlink `skills/hypertrack-integration/` into the agent's skills directory

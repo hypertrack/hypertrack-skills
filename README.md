@@ -11,37 +11,23 @@ Agent skill for end-to-end [HyperTrack](https://hypertrack.com) integration. Cov
 
 ## Installation
 
-### Pi
-
-```bash
-pi install git:github.com/hypertrack/hypertrack-skills
-```
-
-### Claude Code
-
-Claude Code loads skills from `~/.claude/skills/<name>/SKILL.md`, one level deep. Clone the repo anywhere, then link the skill folder into your skills directory:
-
-```bash
-git clone https://github.com/hypertrack/hypertrack-skills.git ~/hypertrack-skills
-mkdir -p ~/.claude/skills
-ln -s ~/hypertrack-skills/skills/hypertrack-integration ~/.claude/skills/hypertrack-integration
-```
-
-To update, run `git pull` in the clone.
-
-Or use [skills.sh](https://skills.sh):
+Install with [skills](https://skills.sh), which works with Claude Code, Codex, Cursor, Pi, GitHub Copilot, Gemini CLI, OpenCode, and [many other agents](https://github.com/vercel-labs/skills#supported-agents):
 
 ```bash
 npx skills add hypertrack/hypertrack-skills
 ```
 
-### Manual (any agent)
+It detects the coding agents you have installed and adds the skill to the current project. Add `-g` to install it for all your projects instead. Update later with `npx skills update`.
 
-Point your agent at the skill entry point:
+### Pi package
 
+```bash
+pi install git:github.com/hypertrack/hypertrack-skills
 ```
-skills/hypertrack-integration/SKILL.md
-```
+
+### Manual install
+
+Copy or symlink `skills/hypertrack-integration/` into your agent's skills directory.
 
 ## Skill structure
 
