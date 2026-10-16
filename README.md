@@ -19,11 +19,15 @@ pi install git:github.com/hypertrack/hypertrack-skills
 
 ### Claude Code
 
-Clone and add to your skills directory:
+Claude Code loads skills from `~/.claude/skills/<name>/SKILL.md`, one level deep. Clone the repo anywhere, then link the skill folder into your skills directory:
 
 ```bash
-git clone https://github.com/hypertrack/hypertrack-skills.git ~/.claude/skills/hypertrack-skills
+git clone https://github.com/hypertrack/hypertrack-skills.git ~/hypertrack-skills
+mkdir -p ~/.claude/skills
+ln -s ~/hypertrack-skills/skills/hypertrack-integration ~/.claude/skills/hypertrack-integration
 ```
+
+To update, run `git pull` in the clone.
 
 Or use [skills.sh](https://skills.sh):
 
