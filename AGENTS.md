@@ -8,44 +8,57 @@ Agent skill repository for HyperTrack integration.
 hypertrack-skills/
 ├── skills/
 │   └── hypertrack-integration/
-│       ├── SKILL.md                  # Main skill: phases, data model, routing, pitfalls
-│       └── references/
-│           ├── sdk-ios.md            # iOS SDK: SPM/CocoaPods, APNs, permissions, errors
-│           ├── sdk-android.md        # Android SDK: Gradle, FCM, whitelisting, permissions
-│           ├── sdk-cross-platform.md # React Native, Expo, Flutter, Ionic Capacitor, .NET MAUI
-│           ├── backend-api.md        # REST API: Orders, Workers, Places, Nearby, Embed
-│           ├── webhooks.md           # Webhook setup, order events, risk events, implementation
-│           └── troubleshooting.md    # Diagnostics, common pitfalls, outage codes
-├── README.md                         # Human-facing: install, usage, links
-├── AGENTS.md                         # This file
-├── VISION.md                         # Direction and goals
-├── TODO.md                           # Next priorities
-└── package.json                      # Pi package manifest
+│       ├── SKILL.md                 # Entry: mental model, rules, workflow, sources of truth
+│       ├── references/
+│       │   ├── mobile.md            # Shared mobile rules: worker handle, permissions, errors, clock-in, on-device orders
+│       │   ├── ios.md               # iOS setup + compiled Swift snippets
+│       │   ├── android.md           # Android setup + compiled Kotlin snippets
+│       │   ├── cross-platform.md    # React Native, Expo, Flutter, Ionic Capacitor, .NET MAUI
+│       │   ├── backend.md           # Auth, errors, orders lifecycle, places, workers, nearby, embeds
+│       │   ├── webhooks.md          # Delivery contract, HMAC-SHA1 verification, event map
+│       │   ├── testing.md           # Agent verification, device test protocol, traps, symptoms, outages
+│       │   └── production.md        # Secrets, store review, whitelisting, monitoring, go-live checklist
+│       └── scripts/
+│           ├── ht.py                # Verification CLI (check, worker, track, order, webhooks, complete/cancel, sign)
+│           └── audit_mobile.py      # Static audit of a mobile repo's HyperTrack setup
+├── tools/
+│   ├── check_refs.py                # URLs resolve; API endpoints exist in the live OpenAPI spec
+│   └── check_snippets.py            # Compile Swift/Kotlin/TS/Dart/C# snippets against the latest SDK releases
+├── tests/                           # Regression tests: ht.py (mock API), audit_mobile.py (fixtures), tools, snippet behavior
+├── justfile                         # check, test, refs, snippets, fmt, scripts
+├── README.md, AGENTS.md, VISION.md, TODO.md
+└── package.json                     # Pi package manifest (pi.skills)
 ```
+
+`skills/hypertrack-integration/` is what ships to users. `tools/` and `.cache/` never ship.
 
 ## How the skill works
 
-1. `SKILL.md` is the entry point — it covers the integration phases, data model, decision guidance, and critical pitfalls
-2. SKILL.md routes to specific references when platform-specific or deep API detail is needed
-3. References are self-contained — each covers one topic end-to-end with code examples and verification steps
+1. `SKILL.md` gives the agent the model (workers, orders, places, tracking intent), the rules that must hold, and a workflow: inspect the repo, settle decisions, implement, verify, go live.
+2. References load on demand per task. Each owns one area; they cross-link instead of repeating each other.
+3. Facts that change (field lists, payloads, SDK symbols) are kept minimal and point to sources of truth: the OpenAPI spec (`https://hypertrack.com/reference/openapi.yaml`), the docs `.md` versions (`https://hypertrack.com/docs/llms.txt`), and the SDK references and quickstarts. The skill holds the judgment the docs don't: decisions, invariants, traps, and verification.
+4. `scripts/` give agents deterministic checks: `audit_mobile.py` for static mobile config and `ht.py` for live account and webhook verification.
 
 ## Key domain concepts
 
-- **Orders API** is the primary tracking mechanism (not manual tracking)
-- `track_mode`: `pre_shift`, `on_shift`, `full_shift` are the supported modes (`on_time`, `flex` are deprecated)
-- GeoJSON coordinates are `[longitude, latitude]` — the most common integration mistake
-- Silent push notifications (APNs + FCM) are mandatory for remote tracking
-- `worker_handle` must be set on login and cleared on logout
+- Backend-managed **Orders** drive tracking by default. On-device orders (native iOS 5.12+/Android 7.12+) are for offline-first apps only. `isTracking` / `work_status` are low-level.
+- `track_mode`: `pre_shift`, `on_shift`, `full_shift` (`on_time` and `flex` are deprecated).
+- GeoJSON (API, webhooks) is `[longitude, latitude]`; every SDK location type is latitude, then longitude (Swift labels, Kotlin/C#/Dart positional, JS `{latitude, longitude}`).
+- Silent push (APNs + FCM, keys uploaded to the dashboard) is mandatory for remote start and stop.
+- `worker_handle` is set on login and launch and cleared to `""` on logout.
+- SecretKey is server-only. Webhooks are signed with HMAC-SHA1 of the raw body using the SecretKey.
+- Server-side availability (`work_status.available`) does not propagate to the device. Set availability on the device.
 
 ## Editing guidelines
 
-- Keep SKILL.md under ~300 lines — it's loaded into agent context on trigger
-- References can be longer (200–500 lines) — they're loaded on demand
-- Every code example should be copy-pasteable with placeholder values clearly marked
-- API examples use curl for universality
-- SDK examples show the primary language per platform (Swift for iOS, Kotlin for Android)
-- Cross-platform reference shows the JS/Dart/C# API surface, delegates native setup to platform refs
-- When HyperTrack docs or API change, update the relevant reference and SKILL.md if the change affects routing or pitfalls
+- **Verify before writing.** Every API field and endpoint must exist in the OpenAPI spec. Every SDK symbol must match the SDK reference or a quickstart. Don't copy from the docs blindly; they have had compile errors.
+- **Snippets compile.** `swift`, `kotlin`, `ts`, `dart`, and `csharp` fences must be complete compilable units (imports + declarations; no top-level statements in Kotlin). Run `just snippets` after touching them. Use fence info `no-check` only for intentionally partial code. Gradle Kotlin DSL goes in `kts` fences, not `kotlin`.
+- **Prefer pointers over copies** for long field lists and payloads. Keep enough in the skill for the common path, and link to the source for the rest.
+- Keep `SKILL.md` around 200 lines. References can be longer but stay focused on one area.
+- Placeholders are explicit (`YOUR_PUBLISHABLE_KEY`, `<version>`, `<order_handle>`). Credentials in examples come from environment variables.
+- **Behavior gets a test.** Changes to `scripts/` or `tools/` need a regression test in `tests/`. Snippets with logic beyond API calls (such as webhook verification) get a behavior test there too; compiling isn't enough.
+- `just check` before committing (dprint, script syntax, tests, links, API endpoints). `just snippets` when snippets or SDK versions change.
+- When the skill's file structure changes, also update the Agent Skills docs page in `hypertrack/hypertrack-content` (`docs/content/guides/agent-skills.mdx`), which shows the tree.
 
 ## Distribution
 
