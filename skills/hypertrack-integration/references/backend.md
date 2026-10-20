@@ -13,7 +13,7 @@ Base URL `https://v3.api.hypertrack.com`. JSON in, JSON out. Field-level truth i
 
 Errors are RFC 7807-style JSON: `status`, `code`, `title`, `detail`, and sometimes `invalid_params`. The spec documents:
 
-- `400`: validation (log `detail`, it names the field)
+- `400`: validation. Log the whole error body (`detail`, `invalid_params`).
 - `401`: wrong credentials (basic auth must be `base64("AccountID:SecretKey")`)
 - `404`: unknown order or worker
 - `409` `duplicate_resource` on `POST /orders/track`: an order or route with that handle already exists. Treat it as "already tracked" in idempotent retries; don't create a new handle blindly.

@@ -2,7 +2,7 @@
 
 ## Secrets and keys
 
-- SecretKey only in backend secret storage. Check the mobile repo for leaks (`audit_mobile.py` flags obvious ones) and rotate the key if one was ever committed.
+- SecretKey only in backend secret storage. Check the mobile repo for leaks (`audit_mobile.py` flags obvious ones). If the key was ever committed, treat it as compromised and ask HyperTrack to replace it.
 - The publishable key is meant to ship in the app. Keep it in config, not scattered through code.
 - Keep the APNs `.p8` and the FCM service-account JSON out of the repo. They live in the HyperTrack dashboard (and your vault).
 
@@ -31,7 +31,7 @@ Samsung, Xiaomi/Redmi, Vivo, OnePlus, OPPO, and others kill background apps no m
 - Ship in-app guidance per manufacturer. HyperTrack's video guides are at `https://hypertrack.com/docs/whitelisting.md`; see also `https://dontkillmyapp.com`.
 - Symptoms: `tracking_service_terminated`, `sdk_killed_by_user` (the worker says they didn't kill the app, but used "clear all" or a memory cleaner), and repeated `location_services_disabled` on OnePlus.
 
-## Operations and monitoring
+## Operations
 
 - Subscribe to `outage_started` / `outage_ended`. For behavioural codes, notify the worker with `outage_description`. Track outage rates per OS and manufacturer.
 - Subscribe to `delayed` / `risk_updated` if you run pre-shift no-show or late-arrival workflows. Define which intensity triggers action.

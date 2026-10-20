@@ -1,11 +1,11 @@
 ---
 name: hypertrack-integration
-description: Build, extend, or debug a HyperTrack integration. Covers the mobile SDK (iOS, Android, React Native, Expo, Flutter, Ionic Capacitor, .NET MAUI), the Orders, Workers, Places, and Nearby APIs, webhooks, verification, and go-live. Use when code touches HyperTrack (hypertrack SDK packages, v3.api.hypertrack.com, x-hypertrack-signature webhooks), or when adding shift, job, visit, or workforce location tracking with HyperTrack.
+description: Build, extend, or debug a HyperTrack integration. Covers the mobile SDK (iOS, Android, React Native, Expo, Flutter, Ionic Capacitor, .NET MAUI), the Orders, Workers, Places, and Nearby APIs, webhooks, verification, and go-live. Use when code touches HyperTrack (hypertrack SDK packages, v3.api.hypertrack.com, x-hypertrack-signature webhooks), or when adding shift, job, or visit workflows with HyperTrack, such as arrival ETAs, late-arrival alerts, on-site clock-in, timesheets, or nearby worker search.
 ---
 
 # HyperTrack integration
 
-HyperTrack tracks workers' phones while they work. The mobile SDK collects location. Your backend tells HyperTrack when work happens by creating **orders**. HyperTrack wakes the device with a silent push, tracks it, detects arrivals, exits, delays, and outages, and reports them through webhooks, the API, and embeddable views.
+HyperTrack helps shift and field work run without hassle. Workers get where they need to be, clock in when they arrive, and get paid for the time they worked. Ops teams see arrivals, delays, and time on site without chasing anyone. Your backend tells HyperTrack when work happens by creating **orders**. For the duration of that work, the mobile SDK provides location. HyperTrack turns it into ETAs, arrivals and exits, time on site, and timesheets, and reports them through webhooks, the API, and embeddable views.
 
 ## How it works
 
@@ -30,7 +30,7 @@ HyperTrack tracks workers' phones while they work. The mobile SDK collects locat
 3. **Worker handle lifecycle.** Set it on login and on every app launch while logged in. Set it to `""` on logout.
 4. **Permissions before the shift.** Get background ("Always") and precise location in the foreground before work starts. The SDK cannot ask for permissions when a push starts tracking in the background.
 5. **Coordinates.** GeoJSON (API, webhooks) is `[longitude, latitude]`. Every SDK location type is the opposite: latitude, then longitude. Pass them by name where the language allows it.
-6. **Every order ends.** Call complete or cancel. Open orders keep the device tracking.
+6. **Location only during work.** Start tracking with the work, and end every order with complete or cancel. Open orders keep the device tracking. HyperTrack's guidance is to use location only during working hours, which is also how you keep workers' trust and permissions.
 7. **Webhooks.** The body is a JSON array. Verify `x-hypertrack-signature`, an HMAC-SHA1 hex digest of the raw body keyed with the SecretKey. Dedupe retries by `x-amz-sns-message-id`, and apply events in `recorded_at` order.
 8. **Don't guess.** Check field names against the OpenAPI spec and SDK symbols against the SDK reference or quickstart (see [Sources of truth](#sources-of-truth)).
 
@@ -58,7 +58,7 @@ Ask the user only for what the code can't tell you.
 | Destination               | Recurring site: create a Place and pass `place_handle`. One-off site: Point plus `radius` (meters), or a Polygon.                                                                                        |
 | Who ends the order        | Your backend, when the shift or job ends: an explicit worker action, or a scheduled job for known end times.                                                                                             |
 | Which events you need     | Lifecycle (`started`, `arrived`, `exited`, `completed`), risk (`delayed`, `risk_updated`), and worker outages (`outage_started`/`outage_ended`). Subscribe to what drives product behavior.              |
-| Clock-in/out at the site? | Use geotags with the order handle and gate the button on the SDK's on-device geofence check (`isInsideGeofence`).                                                                                        |
+| Clock-in/out at the site? | Use geotags with the order handle, and enable the button when the SDK's on-device geofence check (`isInsideGeofence`) says the worker is there.                                                          |
 
 Record the result as a short **HyperTrack contract** (handles, track mode, lead time, destination source, events) in the PR description or a docs file, so the mobile and backend sides match.
 
@@ -84,11 +84,11 @@ Don't report the integration as done until the device test passes, or until you'
 
 ### 5. Go live
 
-Read `references/production.md`: store review (background location, foreground service, privacy answers), Android battery whitelisting, outage monitoring, and a go-live checklist.
+Read `references/production.md`: store review (background location, foreground service, privacy answers), Android battery whitelisting, outage follow-up, and a go-live checklist.
 
 ## Troubleshooting
 
-Read `references/testing.md` § Symptoms. The most common causes, in order:
+Read `references/testing.md` § Symptoms. Common causes (HyperTrack's docs name push setup as the most common):
 
 1. Push not configured (key not uploaded, missing capability, missing `google-services.json`).
 2. Permissions not granted for background or precise location.

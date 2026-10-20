@@ -66,7 +66,7 @@ export async function clockIn(orderHandle: string) {
   const clockInStatus: OrderStatus = { type: 'orderStatusClockIn' };
   const result = await HyperTrack.addGeotag(orderHandle, clockInStatus, { source: 'worker_app' });
   if (result.type === 'failure') {
-    console.warn('Clock-in recorded without a fresh location', result.value);
+    console.warn("Couldn't get a location for the clock-in", result.value);
   }
 }
 
@@ -104,7 +104,7 @@ npx expo install hypertrack-sdk-expo hypertrack-sdk-react-native \
         "hypertrack-sdk-expo",
         {
           "publishableKey": "YOUR_PUBLISHABLE_KEY",
-          "locationPermission": "Your location is used during shifts, even when the app is closed, to record arrival times.",
+          "locationPermission": "Your location is used during your shifts, also while the app is in the background, so your arrival and hours are recorded accurately.",
           "motionPermission": "Motion data improves activity detection in your shift timeline.",
           "foregroundNotificationTitle": "Shift tracking active",
           "foregroundNotificationText": "Your location is tracked during your shift."
@@ -161,7 +161,7 @@ Future<void> clockIn(String orderHandle) async {
     JSONObject({"source": JSONString("worker_app")}),
   );
   if (result is Failure) {
-    // Clock-in recorded without a fresh location.
+    // Couldn't get a location for the clock-in.
   }
 }
 

@@ -26,7 +26,7 @@ Run this on a **physical device** with a debug or internal build. Give the user 
 1. Fresh install, log in. `ht.py worker <handle>` shows a device linked to the worker.
 2. Grant permissions through the app's flow. On iOS choose Always and keep Precise on; on Android choose "Allow all the time". The app's SDK error list is empty.
 3. Send the app to the background by switching apps. Don't swipe it away on iOS or force-stop it on Android (see the traps below).
-4. `ht.py track <handle> … --mode on_shift` at a location near the device. Within a few minutes, `ht.py order <handle>` shows `started_at`, and the order's `embed_url` shows the device moving.
+4. `ht.py track <handle> … --mode on_shift` at a location near the device. Once the device picks up the order, `ht.py order <handle>` shows `started_at` and the order's `embed_url` shows the device. That's quick when push works; opening the app also starts it.
 5. Walk into and out of the geofence, or use a test location. `arrived_at` / `exited_at` are set, and the `arrived` / `exited` webhooks reached your endpoint (`ht.py webhooks`).
 6. If the app has clock-in: it's enabled only inside the geofence, and a `geotag` webhook arrives.
 7. `ht.py complete <order>`. The device stops tracking (the location indicator disappears on iOS; the foreground notification disappears on Android).
@@ -43,7 +43,7 @@ Run this on a **physical device** with a debug or internal build. Give the user 
 | **Simulator / emulator**                                                                       | Fine for the UI and SDK calls. Use a physical device to test push wake-up and background tracking.                                                                   |
 | **Permissions only When In Use**                                                               | Tracking can't start in the background (`insufficientForBackground`). It starts when the app comes to the foreground.                                                |
 | **Debug build vs Firebase config**                                                             | Application ID or signing doesn't match `google-services.json` / the FCM key's project, so no push.                                                                  |
-| **Name/metadata set via API**                                                                  | SDK `name` / `metadata` changes appear ignored. API values take precedence.                                                                                          |
+| **Name/metadata set via the legacy Devices API**                                               | SDK `name` / `metadata` changes appear ignored. Devices API values take precedence.                                                                                  |
 
 Check FCM delivery on Android with the Firebase debug menu: dial `*#*#426#*#*` → Events.
 
@@ -52,7 +52,7 @@ Check FCM delivery on Android with the Firebase debug menu: dial `*#*#426#*#*` �
 | Symptom                                         | Check, in order                                                                                                                                                                                                                                                          |
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 401 from the API                                | AccountID:SecretKey pair (not the publishable key), base64 of `"id:secret"` as one string, stray whitespace or newline in env vars                                                                                                                                       |
-| 400 on `/orders/track`                          | `detail` in the response body. Common causes: missing `track_mode` or `order_handle` / `destination`, malformed GeoJSON, an unclosed polygon                                                                                                                             |
+| 400 on `/orders/track`                          | The error body (`detail`, `invalid_params`). Common causes: missing `track_mode` or `order_handle` / `destination`, malformed GeoJSON, an unclosed polygon                                                                                                               |
 | 409 on `/orders/track`                          | Handle already used (`duplicate_resource`). Check `GET /orders/{handle}` before retrying.                                                                                                                                                                                |
 | Worker never appears                            | App never set the worker handle (or set `""`), wrong or missing publishable key (SDK error `invalidPublishableKey`), app not launched since install                                                                                                                      |
 | Order created, device doesn't start             | Push setup (dashboard keys uploaded, iOS capability and Background Modes, Android Firebase config matches the key's project), permissions (`ht.py worker` → `location_permission`), traps above. Opening the app should start tracking; if it does, push is the problem. |
@@ -71,7 +71,7 @@ When tracking is interrupted, HyperTrack records an outage with a machine-readab
 | -------------- | ----------------- | -------------------------------------------------------------------------------------------------- |
 | `behavioural`  | Worker            | Permission denied or downgraded, Location Services off, app force-stopped or swiped, airplane mode |
 | `os`           | Operating system  | Killed for memory or resources, crash, suspended                                                   |
-| `adversarial`  | Possible fraud    | Mocked location, device time changed (`time_offset_changed` webhook)                               |
+| `adversarial`  | Data integrity    | Mocked location, device time changed (`time_offset_changed` webhook)                               |
 | `sporadic`     | Environment       | No GPS fix                                                                                         |
 | `reachability` | Server ↔ device   | Push failed, push token missing, provisional iOS authorization                                     |
 

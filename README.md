@@ -1,6 +1,6 @@
 # HyperTrack Skills
 
-Agent skill for end-to-end [HyperTrack](https://hypertrack.com) integration. Your coding agent learns how HyperTrack works, which decisions to make, and how to verify the result. It covers the mobile SDK, the backend APIs, webhooks, testing, and go-live.
+Agent skill for end-to-end [HyperTrack](https://hypertrack.com) integration. HyperTrack helps shift and field work run without hassle: on-time arrivals, clock-in at the site, and accurate hours and pay. With this skill, your coding agent learns how HyperTrack works, which decisions to make, and how to verify the result, across the mobile SDK, the backend APIs, webhooks, testing, and go-live.
 
 ## What it covers
 
@@ -8,7 +8,7 @@ Agent skill for end-to-end [HyperTrack](https://hypertrack.com) integration. You
 - **Backend APIs:** the order lifecycle for shift and job tracking, Places, Workers, Nearby search, secure embeds, auth, and errors.
 - **Webhooks:** delivery contract, signature verification, and the full event map, including worker outages.
 - **Verification:** a static audit for mobile repos, a CLI for checking orders and webhook delivery on your account, a device test protocol, and troubleshooting.
-- **Go-live:** secrets, App Store and Google Play review, Android battery whitelisting, monitoring.
+- **Go-live:** secrets, App Store and Google Play review, Android battery whitelisting, outage follow-up.
 
 ## Installation
 
@@ -27,9 +27,9 @@ To install by hand instead, copy or symlink `skills/hypertrack-integration/` int
 Tell your agent what you need:
 
 - _"Integrate HyperTrack into my iOS app"_
-- _"Track shifts with pre-shift late-arrival alerts"_
+- _"Alert us before a shift when a worker is running late"_
 - _"Add HyperTrack order tracking to my Node.js backend"_
-- _"Only let workers clock in when they're at the site"_
+- _"Let workers clock in when they arrive at the site"_
 - _"Debug why my HyperTrack worker isn't tracking"_
 
 The agent inspects your repo first, settles the integration decisions with you, then implements and verifies.

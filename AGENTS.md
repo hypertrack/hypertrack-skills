@@ -17,7 +17,7 @@ hypertrack-skills/
 │       │   ├── backend.md           # Auth, errors, orders lifecycle, places, workers, nearby, embeds
 │       │   ├── webhooks.md          # Delivery contract, HMAC-SHA1 verification, event map
 │       │   ├── testing.md           # Agent verification, device test protocol, traps, symptoms, outages
-│       │   └── production.md        # Secrets, store review, whitelisting, monitoring, go-live checklist
+│       │   └── production.md        # Secrets, store review, whitelisting, outage follow-up, go-live checklist
 │       └── scripts/
 │           ├── ht.py                # Verification CLI (check, worker, track, order, webhooks, complete/cancel, sign)
 │           └── audit_mobile.py      # Static audit of a mobile repo's HyperTrack setup

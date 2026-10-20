@@ -22,9 +22,9 @@ In the target's Signing & Capabilities:
 <key>HyperTrackPublishableKey</key>
 <string>YOUR_PUBLISHABLE_KEY</string>
 <key>NSLocationWhenInUseUsageDescription</key>
-<string>Your location is used during shifts to record arrival times and time on site.</string>
+<string>Your location is used during your shifts so your arrival and hours are recorded accurately.</string>
 <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>Your location is used during shifts, even when the app is closed, to record arrival times and time on site.</string>
+<string>Your location is used during your shifts, also while the app is in the background, so your arrival and hours are recorded accurately and you get paid right.</string>
 <key>NSMotionUsageDescription</key>
 <string>Motion data improves activity detection in your shift timeline.</string>
 <key>UIBackgroundModes</key>
@@ -34,7 +34,7 @@ In the target's Signing & Capabilities:
 </array>
 ```
 
-Purpose strings are mandatory. Write them for the worker and say why tracking helps them (App Store review reads them). Motion permission is optional but improves activity detection.
+Purpose strings are mandatory. Write them for the worker and say how location helps them, for example accurate hours and pay (App Store review reads them). Motion permission is optional but improves activity detection.
 
 ## Silent push (APNs)
 
@@ -182,7 +182,7 @@ func clockIn(orderHandle: String) {
     metadata: ["source": "worker_app"]
   )
   if case let .failure(error) = result {
-    print("Clock-in recorded without a fresh location: \(error)")
+    print("Couldn't get a location for the clock-in: \(error)")
   }
 }
 

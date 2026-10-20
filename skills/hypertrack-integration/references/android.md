@@ -75,7 +75,7 @@ The SDK merges its own permissions (location, foreground service, boot completed
    - Check that the Firebase Cloud Messaging API (V1) is enabled.
 3. On the dashboard [Setup page](https://dashboard.hypertrack.com/setup), paste the JSON under "Server to Device communication".
 
-The key's project, the app's package name, and the build variant's `google-services.json` must all match. Debug builds with a different application ID or an unregistered signature are a common cause of silent failures.
+The key's project, the app's package name, and the build variant's `google-services.json` must all match. HyperTrack's Android FAQ calls out debug builds with a different application ID or an unregistered signature.
 
 ## Worker handle, name, metadata
 
@@ -98,7 +98,7 @@ fun onLogout() {
 
 ## Location permissions
 
-Request in two steps (see `mobile.md` § Permissions): `ACCESS_FINE_LOCATION` + `ACCESS_COARSE_LOCATION`, then `ACCESS_BACKGROUND_LOCATION` separately on API 29+. Show a prominent disclosure before each step. Use the Activity Result API (`ActivityResultContracts.RequestMultiplePermissions` / `RequestPermission`).
+Request in two steps (see `mobile.md` § Permissions): `ACCESS_FINE_LOCATION` + `ACCESS_COARSE_LOCATION`, then `ACCESS_BACKGROUND_LOCATION` separately on API 29+. The SDK's `location-services` dependency already declares all three in the manifest. Show a prominent disclosure before each step. Use the Activity Result API (`ActivityResultContracts.RequestMultiplePermissions` / `RequestPermission`).
 
 ## Errors
 
@@ -142,7 +142,7 @@ fun clockIn(orderHandle: String) {
     val metadata = Json.Object(mapOf("source" to Json.String("worker_app")))
     when (val result = HyperTrack.addGeotag(orderHandle, HyperTrack.OrderStatus.ClockIn, metadata)) {
         is Result.Success -> Unit
-        is Result.Failure -> println("Clock-in recorded without a fresh location: ${result.failure}")
+        is Result.Failure -> println("Couldn't get a location for the clock-in: ${result.failure}")
     }
 }
 

@@ -16,9 +16,9 @@ Run `python3 scripts/audit_mobile.py <repo-root>` after setup. It checks items 1
 
 ## Worker handle lifecycle
 
-- Set it right after a successful login, and on every launch where a session is restored. The SDK persists it, but setting it again is cheap and fixes drift.
+- Set it right after a successful login, and on every launch where a session is restored. That's HyperTrack's guidance: set it on each login and launch.
 - Use your stable internal user ID, the same value the backend uses as `worker_handle` in `POST /orders/track`. Don't use display names. Use an email only if it never changes.
-- On logout, set it to `""`. Otherwise orders for the old user can keep tracking this device.
+- On logout, set it to `""` so HyperTrack knows this device is no longer used by that worker.
 - The handle links a worker to this device. With several devices per worker, the backend's `device_switch_mode` decides which device tracks an order (see `backend.md`).
 
 ## Permissions
@@ -55,7 +55,8 @@ Each SDK exposes the current blocking errors (`errors` / `getErrors()`) and a su
 | location → mocked                                    | Mock location app active and mocking not allowed                      |
 | location → signalLost                                | Transient. Usually just show status.                                  |
 | noExemptionFromBackgroundStartRestrictions (Android) | Open the app; the OS blocked starting tracking in the background      |
-| invalidPublishableKey / blockedFromRunning           | Configuration problem. Log it and alert developers.                   |
+| invalidPublishableKey                                | Wrong publishable key in the app config. Fix the build.               |
+| blockedFromRunning                                   | HyperTrack blocked the SDK remotely. Contact HyperTrack.              |
 
 Errors describe the device right now. Outages that already happened (app killed, push failed, and so on) show up in the dashboard timeline and in `outage_started` webhooks (`webhooks.md`), not in the errors API.
 
@@ -67,7 +68,7 @@ To record when work actually started and ended at the site, add geotags tied to 
 - Optional variant with an `expectedLocation`: HyperTrack reports the `deviation` in meters between the actual and expected location.
 - Geotags work offline. They're stored and sent when the device reconnects. They show up in the order timeline and as `geotag` webhooks.
 
-**Gate the clock-in button on presence at the site.** `HyperTrack.orders` holds the worker's active orders. Each order exposes `isInsideGeofence`, a result of bool or location error, computed on the device against the order destination, so it works offline once the order has been received. Subscribe to orders to update the UI. If the order isn't there yet, keep clock-in disabled.
+**Enable clock-in when the worker is at the site.** `HyperTrack.orders` holds the worker's active orders. Each order exposes `isInsideGeofence`, a result of bool or location error, computed on the device against the order destination, so it works offline once the order has been received. Subscribe to orders to update the UI. If the order isn't there yet, keep clock-in disabled.
 
 ## Coordinates
 
@@ -90,7 +91,7 @@ Code is in `ios.md` and `android.md`.
 
 ## Name and metadata
 
-`name` and `metadata` label the device in the dashboard and in webhooks. Values set with the backend API take precedence over values set by the SDK. If SDK changes don't show up, check whether the backend set them.
+`name` and `metadata` label the device in the dashboard and in webhooks. Values set through the legacy Devices API take precedence over the SDK setters. If SDK changes don't show up, check whether that API was used.
 
 ## SDK configuration keys
 
