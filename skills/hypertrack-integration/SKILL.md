@@ -5,114 +5,97 @@ description: Build, extend, or debug a HyperTrack integration. Covers the mobile
 
 # HyperTrack integration
 
-HyperTrack helps shift and field work run without hassle. Workers get where they need to be, clock in when they arrive, and get paid for the time they worked. Ops teams see arrivals, delays, and time on site without chasing anyone. Your backend tells HyperTrack when work happens by creating **orders**. For the duration of that work, the mobile SDK provides location. HyperTrack turns it into ETAs, arrivals and exits, time on site, and timesheets, and reports them through webhooks, the API, and embeddable views.
+HyperTrack helps shift and field work run without hassle. Workers get where they need to be, clock in when they arrive, and get paid for the time they worked. Ops teams see arrivals, delays, and time on site without chasing anyone.
+
+This skill doesn't repeat HyperTrack's docs. It tells you which page to fetch for each task, plus the judgment the docs don't spell out. Every docs guide is available as Markdown at `https://hypertrack.com/docs/<slug>.md` (index: `https://hypertrack.com/docs/llms.txt`). The API is defined in `https://hypertrack.com/reference/openapi.yaml`. **Fetch the page before writing the code it covers; don't work from memory.**
 
 ## How it works
 
-| Concept   | Your identifier                             | Notes                                                                       |
-| --------- | ------------------------------------------- | --------------------------------------------------------------------------- |
-| Worker    | `worker_handle` = your user ID              | Created when the app sets the worker handle. Can also be created via API.   |
-| Device    | `device_id` (SDK-generated)                 | Linked to a worker by the worker handle. A worker can have several devices. |
-| Order     | `order_handle` = your shift, job, or visit  | A unit of tracked work with a destination geofence and a `track_mode`.      |
-| Place     | `place_handle` = your site or location ID   | A recurring destination. HyperTrack learns better boundaries over time.     |
-| Ops group | `ops_group_handle` = your division / region | Optional grouping with a timezone.                                          |
+- **Worker** = your user, identified by `worker_handle` (your user ID), which the app sets in the SDK.
+- **Order** = one unit of work (a shift, job, or visit) at one destination, identified by `order_handle` (your ID). Your backend creates it with `POST /orders/track`. HyperTrack wakes the worker's device with a silent push and starts location for that work. Completing or cancelling the worker's last active order stops it.
+- **Place** = a recurring destination, identified by `place_handle`. HyperTrack learns its real boundary from visits.
+- **Results** come back as webhooks, through the API, and as embeddable views: ETAs, delays, arrivals and exits, time on site, timesheets, and outages with reasons.
+- Prefer backend-managed orders. On-device orders (native iOS 5.12+, Android 7.12+) are only for offline-first apps that must start work with no connectivity. The SDK's `isTracking` and the `work_status` API are low-level switches; use them only when asked. Fetch `https://hypertrack.com/docs/track-work.md`.
 
-**Tracking intent** decides when the device tracks. The SDK merges the server-side intent from orders with the device-side `isTracking`. A silent push delivers changes, and the app syncs again whenever it opens. Prefer these ways to control tracking, in this order:
+## Rules agents get wrong
 
-1. **Backend Orders API**, the default: tracking starts when an order is tracked and stops when the worker's last active order is completed or cancelled.
-2. **On-device orders** (native iOS 5.12.0+, Android 7.12.0+): only for offline-first apps that must start full order tracking with no connectivity.
-3. **`isTracking` / `work_status`**: low-level switches. Use only when the user explicitly asks. A device-side `isTracking = true` persists after orders complete.
-
-## Rules that must hold
-
-1. **SecretKey stays on servers.** Mobile apps get only the publishable key. Never put AccountID or SecretKey in app code, mobile config, or client-side JS. Never commit them.
-2. **Silent push on every platform.** Upload the APNs auth key (`.p8` plus Team ID) and the FCM service-account JSON on the dashboard [Setup page](https://dashboard.hypertrack.com/setup). Without them, remote start and stop depend on the worker opening the app.
-3. **Worker handle lifecycle.** Set it on login and on every app launch while logged in. Set it to `""` on logout.
-4. **Permissions before the shift.** Get background ("Always") and precise location in the foreground before work starts. The SDK cannot ask for permissions when a push starts tracking in the background.
-5. **Coordinates.** GeoJSON (API, webhooks) is `[longitude, latitude]`. Every SDK location type is the opposite: latitude, then longitude. Pass them by name where the language allows it.
-6. **Location only during work.** Start tracking with the work, and end every order with complete or cancel. Open orders keep the device tracking. HyperTrack's guidance is to use location only during working hours, which is also how you keep workers' trust and permissions.
-7. **Webhooks.** The body is a JSON array. Verify `x-hypertrack-signature`, an HMAC-SHA1 hex digest of the raw body keyed with the SecretKey. Dedupe retries by `x-amz-sns-message-id`, and apply events in `recorded_at` order.
-8. **Don't guess.** Check field names against the OpenAPI spec and SDK symbols against the SDK reference or quickstart (see [Sources of truth](#sources-of-truth)).
+1. **SecretKey stays on the server.** The app gets only the publishable key. Never put AccountID or SecretKey in mobile code, client-side JS, or a committed file.
+2. **Silent push on every platform.** The APNs key and the FCM service-account JSON must be uploaded on the dashboard [Setup page](https://dashboard.hypertrack.com/setup). Without them, start and stop wait until the worker opens the app. HyperTrack's docs name this as the most common reason tracking never starts.
+3. **Worker handle:** set it on every login and app launch, and set it to `""` on logout. Fetch `https://hypertrack.com/docs/worker-setup.md`.
+4. **Permissions before the shift.** Background ("Always" / "Allow all the time") and precise location must be granted in the foreground before work starts; a push can't trigger a permission prompt. On iOS ask When In Use first, then Always (asking for Always first leaves the app in "provisional" authorization). On Android, request background location as a separate second step after a prominent disclosure. Fetch `https://hypertrack.com/docs/ios-sdk-faq.md` and `https://hypertrack.com/docs/prepare-for-google-play-submission.md`.
+5. **Coordinates:** the API and webhooks use GeoJSON `[longitude, latitude]`. Every SDK location type is latitude first. Pass them by name where the language allows.
+6. **Location only during work.** Start it with the work, and end every order with complete or cancel. Open orders keep the device tracking. Fetch `https://hypertrack.com/docs/manage-tracking-permissions.md`.
+7. **Verify webhook signatures on the raw body**, before any JSON parsing. Fetch `https://hypertrack.com/docs/stream-order-activity-markers-via-webhooks.md` (section "Validate webhook notifications").
+8. **Don't guess** API fields or SDK symbols. Check the OpenAPI spec, the SDK reference, or a quickstart. The spec is 1.2 MB, so search it instead of reading it whole: `grep -n -A40 '^  /orders/track:'` for the path, then the same for the `$ref` schema names it points to (e.g. `'^    TrackOrdersRequest:'`).
 
 ## Workflow
 
-### 1. Inspect before editing
+### 1. Inspect the repo first
 
-Find out which side this repo is: mobile, backend, or both. Customers usually keep them in separate repos, so do your side and write down the shared decisions (step 2) for the other.
-
-- **Mobile:** run `python3 scripts/audit_mobile.py <repo-root>` (path relative to this skill's directory). It detects the platform and reports missing keys, capabilities, dependencies, push setup, and worker-handle calls.
-- Find the login and logout code paths, and the screen where a worker starts work.
-- Find the domain entity that should become an order (shift, job, visit, delivery) and its start time, end time, and location.
-- Check what already exists: Firebase/FCM, APNs entitlement, a backend HTTP client, secret storage, webhook endpoints, background jobs or cron.
-- If HyperTrack is already integrated, check its SDK version against the latest release and treat the rules above as an audit checklist.
+- Is this repo the mobile app, the backend, or both? Customers usually have separate repos. Do your side and write down the shared decisions (step 2) for the other side.
+- Find: the platform and the existing HyperTrack version, if any; the login and logout code; the screen where a worker starts work; the entity that should become an order (shift, job, visit) with its time and location; existing Firebase/FCM and APNs setup; how the backend stores secrets; existing webhook endpoints and scheduled jobs.
 
 ### 2. Settle the decisions
 
-Ask the user only for what the code can't tell you.
+Ask the user only what the code can't tell you, then record the answers (handles, track mode, lead time, destination source, events) in the PR description or a docs file so both sides match.
 
-| Decision                  | Guidance                                                                                                                                                                                                 |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| What is an order?         | One unit of work at one destination, usually a shift or a job. Use your stable ID as `order_handle`.                                                                                                     |
-| `track_mode`              | `pre_shift`: ETA, delay, and no-show risk before arrival (set `scheduled_at`). `on_shift`: geofence entries and exits and time on site (set `expected_service_time`; no delay risk). `full_shift`: both. |
-| When to start tracking    | `pre_shift`: customers typically start 90–120 min before `scheduled_at`. `on_shift`: about 30 min before. Start early enough for the push to land; iOS throttles silent pushes.                          |
-| Destination               | Recurring site: create a Place and pass `place_handle`. One-off site: Point plus `radius` (meters), or a Polygon.                                                                                        |
-| Who ends the order        | Your backend, when the shift or job ends: an explicit worker action, or a scheduled job for known end times.                                                                                             |
-| Which events you need     | Lifecycle (`started`, `arrived`, `exited`, `completed`), risk (`delayed`, `risk_updated`), and worker outages (`outage_started`/`outage_ended`). Subscribe to what drives product behavior.              |
-| Clock-in/out at the site? | Use geotags with the order handle, and enable the button when the SDK's on-device geofence check (`isInsideGeofence`) says the worker is there.                                                          |
-
-Record the result as a short **HyperTrack contract** (handles, track mode, lead time, destination source, events) in the PR description or a docs file, so the mobile and backend sides match.
+| Decision          | Guidance                                                                                                                                                                                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| What's an order?  | One unit of work at one destination. Use your own stable ID as `order_handle`, one order per occurrence (e.g. `shift-<id>-<date>`).                                                                                      |
+| `track_mode`      | `pre_shift` for ETAs and late-arrival risk before the shift, `on_shift` for time on site, `full_shift` for both. Fetch `https://hypertrack.com/docs/shift-tracking.md`.                                                  |
+| When to start     | For `pre_shift`, customers typically start 90–120 minutes before the shift (`https://hypertrack.com/docs/ncns-detection.md`); for `on_shift`, about 30 minutes before (`https://hypertrack.com/docs/shift-tracking.md`). |
+| Destination       | Recurring site: a Place (`https://hypertrack.com/docs/places.md`). One-off: a point with a radius, or a polygon.                                                                                                         |
+| Who ends it       | Your backend: on a worker action, or a scheduled job at the known end time.                                                                                                                                              |
+| Which events      | Only what drives product behavior. Index: `https://hypertrack.com/reference/webhooks.md`. To help workers fix permission or app problems: `https://hypertrack.com/reference/webhooks/outage-codes.md`.                   |
+| Clock-in at site? | Geotags on the order, with the button enabled by the SDK's on-device geofence check. Fetch `https://hypertrack.com/docs/geofenced-clock-in-out.md`.                                                                      |
 
 ### 3. Implement
 
-| Area                                                                                 | Read                                                               |
-| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
-| Mobile, any platform (shared rules, permissions, errors, clock-in, on-device orders) | `references/mobile.md`                                             |
-| iOS / Android native setup and code                                                  | `references/ios.md`, `references/android.md`                       |
-| React Native, Expo, Flutter, Ionic Capacitor, .NET MAUI                              | `references/cross-platform.md` (plus the native setup it links to) |
-| Backend: orders, places, workers, nearby, embeds, auth, errors                       | `references/backend.md`                                            |
-| Webhook endpoint                                                                     | `references/webhooks.md`                                           |
+Before writing the code for a task, fetch its page:
 
-Get the latest SDK version from `https://api.github.com/repos/hypertrack/<repo>/releases/latest` (`tag_name`). The repos are `sdk-ios`, `sdk-android`, `sdk-react-native`, `sdk-expo`, `sdk-flutter`, and `sdk-ionic-capacitor`. Android plugin artifacts use the same version as `sdk-android`. For .NET MAUI, use NuGet (`https://api.nuget.org/v3-flatcontainer/hypertrack.sdk.maui/index.json`, last entry); its GitHub releases lag behind.
+| Task                                                | Fetch                                                                                                                                                                                                                                                                                                                                                   |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| iOS app                                             | `https://hypertrack.com/docs/install-sdk-ios.md`                                                                                                                                                                                                                                                                                                        |
+| Android app                                         | `https://hypertrack.com/docs/install-sdk-android.md`, `https://hypertrack.com/docs/fcm-service-account.md`, `https://hypertrack.com/docs/plugins.md`                                                                                                                                                                                                    |
+| React Native / Expo                                 | `https://hypertrack.com/docs/install-sdk-react-native.md` / `https://hypertrack.com/docs/install-sdk-expo.md`                                                                                                                                                                                                                                           |
+| Flutter / Ionic Capacitor / .NET MAUI               | `https://hypertrack.com/docs/install-sdk-flutter.md` / `https://hypertrack.com/docs/install-sdk-ionic-capacitor.md` / `https://hypertrack.com/docs/install-sdk-maui.md`                                                                                                                                                                                 |
+| SDK config keys (mock locations, notification text) | `https://hypertrack.com/docs/sdk-config.md`                                                                                                                                                                                                                                                                                                             |
+| Creating and ending orders                          | `https://hypertrack.com/docs/track-work.md`, `https://hypertrack.com/docs/shift-tracking.md`, then the `/orders` paths in the OpenAPI spec                                                                                                                                                                                                              |
+| Workers, ops groups                                 | `https://hypertrack.com/docs/worker-setup.md`                                                                                                                                                                                                                                                                                                           |
+| Workers with several devices                        | `https://hypertrack.com/docs/multi-device-workers.md`                                                                                                                                                                                                                                                                                                   |
+| Nearby search, availability                         | `https://hypertrack.com/docs/assign-orders-to-nearby-drivers.md`, `https://hypertrack.com/docs/manage-worker-availability.md`                                                                                                                                                                                                                           |
+| Webhook endpoint                                    | `https://hypertrack.com/docs/stream-order-activity-markers-via-webhooks.md`, `https://hypertrack.com/reference/webhooks.md`, then `https://hypertrack.com/reference/webhooks/<event>.md` per event                                                                                                                                                      |
+| Embedded views                                      | `https://hypertrack.com/docs/embed-views-into-ops-dashboard.md`                                                                                                                                                                                                                                                                                         |
+| SDK symbols                                         | iOS `https://hypertrack.github.io/mobile/sdk-ios/latest/documentation/hypertrack/hypertrack/`, Android `https://hypertrack.github.io/mobile/sdk-android/latest/-hyper-track%20-s-d-k%20for%20-android/com.hypertrack.sdk.android/-hyper-track/index.html`, others at `https://hypertrack.github.io/sdk-<react-native, flutter, ionic-capacitor, maui>/` |
+| A working example                                   | `https://github.com/hypertrack/quickstart-<ios, android, react-native, expo, flutter, ionic-capacitor, maui>`                                                                                                                                                                                                                                           |
+
+**Versions:** use the latest release, `tag_name` from `https://api.github.com/repos/hypertrack/sdk-<ios, android, react-native, expo, flutter, ionic-capacitor>/releases/latest`. Android plugin artifacts share the `sdk-android` version. For .NET MAUI, use NuGet (`https://api.nuget.org/v3-flatcontainer/hypertrack.sdk.maui/index.json`, last entry); its GitHub releases lag behind.
+
+**Judgment the docs don't spell out:**
+
+- Webhooks: don't let a late event reopen a finished order. Return 200 for event types you don't handle; new ones get added. Join on `order_handle` and `worker_handle`, not `device_id`. A worker can switch devices. A framework body parser (for example a global `express.json()`) breaks signature checks, so hash the raw bytes. The docs count any 200–4xx response as delivered, so return 5xx only when you want a retry.
+- Backend: derive order handles from your own IDs so retries are safe. On `409 duplicate_resource`, `GET` the order before deciding what to do. Run a reconciliation job that completes or cancels HyperTrack orders whose work ended in your system. URL-encode handles in paths (`james%40co.com`).
+- Availability set on the server (`work_status`) doesn't currently reach the device, so the SDK won't start collecting location for Nearby. When the device needs to react, set availability in the app.
+- Expo: the HyperTrack config plugin adds native code, so it needs a native build (the prebuild step on the Expo install page); it won't run in Expo Go.
+- Cordova (`cordova-plugin-hypertrack-v3`) isn't supported, even though a docs page exists. Use Ionic Capacitor.
 
 ### 4. Verify
 
-- **Backend and account** (needs `HYPERTRACK_ACCOUNT_ID` / `HYPERTRACK_SECRET_KEY` in the environment): `python3 scripts/ht.py check`, then `track`, `order`, `webhooks`, and `complete`. The `webhooks` command shows every webhook HyperTrack sent for an order, with your endpoint's HTTP status. Run `python3 scripts/ht.py --help`.
-- **Mobile (static):** `python3 scripts/audit_mobile.py <repo-root>` should report no `FAIL` lines, and the app must build.
-- **On a device** (needs a person with a phone): follow `references/testing.md`. It covers the test protocol and the traps that make tracking look broken when it isn't: force-stopped Android apps, force-quit iOS apps, and mock locations.
+Read `references/testing.md`. It covers what you can check yourself (the build, the API, webhook delivery), the device test a person has to run, and the traps that make a working integration look broken. Don't report the integration as done until the device test passes, or until you've told the user exactly which device steps remain.
 
-Don't report the integration as done until the device test passes, or until you've told the user exactly which device steps remain.
+The read-only HyperTrack MCP server (`https://hypertrack.com/docs/mcp-server.md`) is useful for inspecting live orders, workers, and order webhooks if the user has it connected.
 
 ### 5. Go live
 
-Read `references/production.md`: store review (background location, foreground service, privacy answers), Android battery whitelisting, outage follow-up, and a go-live checklist.
+Check before launch:
 
-## Troubleshooting
-
-Read `references/testing.md` § Symptoms. Common causes (HyperTrack's docs name push setup as the most common):
-
-1. Push not configured (key not uploaded, missing capability, missing `google-services.json`).
-2. Permissions not granted for background or precise location.
-3. `worker_handle` not set, or set on a different device than expected.
-4. Swapped coordinates.
-5. Orders never completed.
-
-## Sources of truth
-
-Fetch these when a reference doesn't cover something. Don't fill gaps from memory.
-
-| Need                                | Source                                                                                                                                             |
-| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exact API fields, enums, endpoints  | OpenAPI spec: `https://hypertrack.com/reference/openapi.yaml`                                                                                      |
-| Any guide as Markdown               | Index: `https://hypertrack.com/docs/llms.txt`. Each guide: `https://hypertrack.com/docs/<slug>.md`.                                                |
-| Webhook payload for one event type  | `https://hypertrack.com/reference/webhooks/<slug>` (overview: `https://hypertrack.com/reference/webhooks`)                                         |
-| iOS SDK symbols                     | `https://hypertrack.github.io/mobile/sdk-ios/latest/documentation/hypertrack/hypertrack/`                                                          |
-| Android SDK symbols                 | `https://hypertrack.github.io/mobile/sdk-android/latest/-hyper-track%20-s-d-k%20for%20-android/com.hypertrack.sdk.android/-hyper-track/index.html` |
-| RN / Flutter / Ionic / MAUI symbols | `https://hypertrack.github.io/sdk-react-native/`, `/sdk-flutter/`, `/sdk-ionic-capacitor/`, `/sdk-maui/`                                           |
-| Working example apps                | `https://github.com/hypertrack/quickstart-<platform>` (`ios`, `android`, `react-native`, `expo`, `flutter`, `ionic-capacitor`, `maui`)             |
-| SDK changes between versions        | `CHANGELOG.md` in each `hypertrack/sdk-*` repo                                                                                                     |
-
-Cordova (`cordova-plugin-hypertrack-v3`) isn't supported, even though a docs page still exists. For Ionic or other web-view apps, use Ionic Capacitor.
-
-## Live account access (optional)
-
-The read-only HyperTrack MCP server (`npx -y @hypertrack/mcp-server`, with `HYPERTRACK_ACCOUNT_ID` / `HYPERTRACK_SECRET_KEY`) lets an agent query live orders, workers, devices, and order webhooks. If it's connected, use it to inspect state. It can't create or change anything; `scripts/ht.py` covers that for testing. Setup: `https://hypertrack.com/docs/mcp-server.md`.
+- [ ] SecretKey only on the server. The publishable key is in the app config.
+- [ ] APNs (production) and FCM keys uploaded. A push-started order works on a release build on a physical device.
+- [ ] Worker handle set on login and launch, cleared on logout, and equal to the backend's `worker_handle`.
+- [ ] Permissions requested in two steps, in the foreground, before the first shift. SDK errors are shown to the worker with a way to fix them.
+- [ ] Orders use the agreed track mode, lead time, and destination. Coordinates are `[longitude, latitude]`.
+- [ ] Every order is completed or cancelled, and a reconciliation job exists.
+- [ ] Webhook endpoint verifies signatures on the raw body, answers fast, and handles retries and ordering.
+- [ ] Device test passed on iOS and Android (`references/testing.md`).
+- [ ] App Store and Google Play submissions prepared: `https://hypertrack.com/docs/prepare-for-app-store-submission.md`, `https://hypertrack.com/docs/prepare-for-google-play-submission.md`.
+- [ ] Android workers have battery-saver whitelisting guidance: `https://hypertrack.com/docs/whitelisting.md`.

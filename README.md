@@ -4,11 +4,10 @@ Agent skill for end-to-end [HyperTrack](https://hypertrack.com) integration. Hyp
 
 ## What it covers
 
-- **Mobile SDK:** iOS, Android, React Native, Expo, Flutter, Ionic Capacitor, .NET MAUI. Worker handle lifecycle, permissions, errors, clock-in/out with on-device geofencing, and on-device orders for offline-first apps.
-- **Backend APIs:** the order lifecycle for shift and job tracking, Places, Workers, Nearby search, secure embeds, auth, and errors.
-- **Webhooks:** delivery contract, signature verification, and the full event map, including worker outages.
-- **Verification:** a static audit for mobile repos, a CLI for checking orders and webhook delivery on your account, a device test protocol, and troubleshooting.
-- **Go-live:** secrets, App Store and Google Play review, Android battery whitelisting, outage follow-up.
+- **Routing:** for each task (mobile SDK on any platform, orders, workers, places, Nearby search, webhooks, embedded views), the agent fetches the matching HyperTrack docs page as Markdown, the OpenAPI spec, or an SDK reference, instead of relying on memory.
+- **Judgment the docs don't spell out:** the decisions to settle with you, the rules agents tend to get wrong, and webhook and backend habits.
+- **Verification:** checks the agent can run itself, a device test for a person with a phone, and the traps that make a working integration look broken.
+- **Go-live:** a checklist before launch.
 
 ## Installation
 
@@ -34,32 +33,21 @@ Tell your agent what you need:
 
 The agent inspects your repo first, settles the integration decisions with you, then implements and verifies.
 
-For verification against your account, export `HYPERTRACK_ACCOUNT_ID` and `HYPERTRACK_SECRET_KEY` (Setup page in the dashboard) in the agent's environment. To let the agent query live account data as well, add the read-only [HyperTrack MCP server](https://hypertrack.com/docs/mcp-server).
+To let the agent check its work against your account, export `HYPERTRACK_ACCOUNT_ID` and `HYPERTRACK_SECRET_KEY` (Setup page in the dashboard) in its environment, or connect the read-only [HyperTrack MCP server](https://hypertrack.com/docs/mcp-server).
 
 ## Skill structure
 
 ```
 skills/hypertrack-integration/
-├── SKILL.md                 # Model, rules, workflow, sources of truth
-├── references/
-│   ├── mobile.md            # Shared mobile rules
-│   ├── ios.md               # iOS
-│   ├── android.md           # Android
-│   ├── cross-platform.md    # React Native, Expo, Flutter, Ionic Capacitor, .NET MAUI
-│   ├── backend.md           # Orders, places, workers, nearby, embeds
-│   ├── webhooks.md          # Webhook endpoint and event map
-│   ├── testing.md           # Verification, device testing, troubleshooting
-│   └── production.md        # Store review, whitelisting, go-live
-└── scripts/
-    ├── ht.py                # Account verification CLI
-    └── audit_mobile.py      # Static mobile setup audit
+├── SKILL.md            # Model, rules, workflow, which docs page to fetch for each task, go-live checklist
+└── references/
+    └── testing.md      # Verification, device test, traps, symptoms
 ```
 
 ## Development
 
 ```bash
-just check      # dprint, script syntax, regression tests, links, API endpoints vs the live OpenAPI spec
-just snippets   # compile Swift/Kotlin/TS/Dart/C# snippets against the latest SDK releases
+just check   # size budget, formatting, links and API endpoints vs the live OpenAPI spec
 ```
 
 ## HyperTrack resources
