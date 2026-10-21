@@ -6,7 +6,7 @@
 2. [x] Slim the skill to routing + judgment (VISION.md): `SKILL.md` plus a short `testing.md`, under `just budget`, which is part of `just check`
 3. [ ] Before merging PR #1: run one real agent session with the slim skill and one with `main`'s skill on the same task (e.g. the iOS quickstart with HyperTrack removed). Does it fetch the linked pages, build, and pass the device checklist? If it doesn't follow the pointers, rethink before going further. Then squash-merge.
 4. [ ] Update the Agent Skills docs page (`hypertrack-content/docs/content/guides/agent-skills.mdx`) to show the slim file tree
-5. [ ] Ask the SDK team to list `activity-service-google` in `sdk-android/PLUGINS.md`, and to publish the `sdk-maui` 1.0.4 GitHub release and changelog
+5. [ ] Publish the `sdk-maui` 1.0.4 GitHub release and changelog (it's on NuGet since January)
 
 ## Next
 
