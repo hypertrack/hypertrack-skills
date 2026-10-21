@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Agent skill repository for HyperTrack integration.
+Agent skill repository for HyperTrack integration. Read `VISION.md` before changing the skill.
 
 ## Repository structure
 
@@ -8,44 +8,32 @@ Agent skill repository for HyperTrack integration.
 hypertrack-skills/
 ├── skills/
 │   └── hypertrack-integration/
-│       ├── SKILL.md                  # Main skill: phases, data model, routing, pitfalls
+│       ├── SKILL.md             # Model, rules, workflow, where to fetch each docs page, judgment the docs lack, go-live checklist
 │       └── references/
-│           ├── sdk-ios.md            # iOS SDK: SPM/CocoaPods, APNs, permissions, errors
-│           ├── sdk-android.md        # Android SDK: Gradle, FCM, whitelisting, permissions
-│           ├── sdk-cross-platform.md # React Native, Expo, Flutter, Ionic Capacitor, .NET MAUI
-│           ├── backend-api.md        # REST API: Orders, Workers, Places, Nearby, Embed
-│           ├── webhooks.md           # Webhook setup, order events, risk events, implementation
-│           └── troubleshooting.md    # Diagnostics, common pitfalls, outage codes
-├── README.md                         # Human-facing: install, usage, links
-├── AGENTS.md                         # This file
-├── VISION.md                         # Direction and goals
-├── TODO.md                           # Next priorities
-└── package.json                      # Pi package manifest
+│           └── testing.md       # Agent-side checks (curl, signature), device test, traps, symptoms
+├── tools/
+│   └── check_refs.py            # URLs resolve; API endpoints exist in the live OpenAPI spec
+├── justfile                     # check, budget, refs, fmt
+├── README.md, AGENTS.md, VISION.md, TODO.md
+└── package.json                 # Pi package manifest (pi.skills)
 ```
+
+`skills/hypertrack-integration/` is what ships to users. `tools/` doesn't ship.
 
 ## How the skill works
 
-1. `SKILL.md` is the entry point — it covers the integration phases, data model, decision guidance, and critical pitfalls
-2. SKILL.md routes to specific references when platform-specific or deep API detail is needed
-3. References are self-contained — each covers one topic end-to-end with code examples and verification steps
-
-## Key domain concepts
-
-- **Orders API** is the primary tracking mechanism (not manual tracking)
-- `track_mode`: `pre_shift`, `on_shift`, `full_shift` are the supported modes (`on_time`, `flex` are deprecated)
-- GeoJSON coordinates are `[longitude, latitude]` — the most common integration mistake
-- Silent push notifications (APNs + FCM) are mandatory for remote tracking
-- `worker_handle` must be set on login and cleared on logout
+The skill routes; the docs are the source. `SKILL.md` gives the agent a short model and the rules agents get wrong. For each task it gives an explicit instruction to fetch one docs page (`https://hypertrack.com/docs/<slug>.md`, `https://hypertrack.com/reference/webhooks/<event>.md`, the OpenAPI spec, an SDK reference, or a quickstart). It adds one line each for judgment the docs don't contain. `references/testing.md` covers verification, which the docs don't.
 
 ## Editing guidelines
 
-- Keep SKILL.md under ~300 lines — it's loaded into agent context on trigger
-- References can be longer (200–500 lines) — they're loaded on demand
-- Every code example should be copy-pasteable with placeholder values clearly marked
-- API examples use curl for universality
-- SDK examples show the primary language per platform (Swift for iOS, Kotlin for Android)
-- Cross-platform reference shows the JS/Dart/C# API surface, delegates native setup to platform refs
-- When HyperTrack docs or API change, update the relevant reference and SKILL.md if the change affects routing or pitfalls
+- **Don't restate the docs.** Before adding a line, check whether one docs page covers it. If it does, link that page with an explicit fetch instruction and add nothing else. Only judgment the docs lack (decisions, rules agents get wrong, traps scattered across pages) goes in, one line each with a link.
+- **Docs are wrong? Fix the docs.** Open a PR in `hypertrack/hypertrack-content` instead of patching around it in the skill. A temporary one-liner is fine until the fix ships, with a TODO to remove it.
+- **Verify before writing.** Every claim must come from a source you read in that session: a docs page, the OpenAPI spec, an SDK reference or changelog, or the SDK source. Label platform knowledge that isn't from HyperTrack's sources as such, or leave it out.
+- **Size:** `SKILL.md` ≤ 200 lines and all skill Markdown ≤ 300, enforced by `just budget` (part of `just check`). Raising the limit is a deliberate decision in its own commit.
+- **Cut by content, not by file.** When trimming, ask of each line whether a docs page covers it and whether it's judgment.
+- Placeholders are explicit (`<test-worker>`, `<order_handle>`). Credentials in examples come from environment variables.
+- Run `just check` before committing (size, formatting, links, API endpoints).
+- When the skill's file structure changes, also update the Agent Skills docs page in `hypertrack/hypertrack-content` (`docs/content/guides/agent-skills.mdx`), which shows the tree.
 
 ## Distribution
 
