@@ -1,8 +1,20 @@
 default:
     @just --list
 
-# Formatting, script syntax, regression tests, links, and API endpoints vs the live OpenAPI spec
-check: fmt-check scripts test refs
+# Keep the skill small: SKILL.md <= 200 lines, all skill Markdown <= 300 lines
+budget:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    skill=$(wc -l < skills/hypertrack-integration/SKILL.md | tr -d ' ')
+    total=$(find skills -name '*.md' -exec cat {} + | wc -l | tr -d ' ')
+    echo "SKILL.md: $skill/200 lines, all skill Markdown: $total/300 lines"
+    if [ "$skill" -gt 200 ] || [ "$total" -gt 300 ]; then
+        echo "over budget: link to the docs instead of restating them (see VISION.md)"
+        exit 1
+    fi
+
+# Size budget, formatting, script syntax, regression tests, links, and API endpoints vs the live OpenAPI spec
+check: budget fmt-check scripts test refs
 
 # Format Markdown with dprint
 fmt:

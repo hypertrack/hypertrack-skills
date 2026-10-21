@@ -53,8 +53,10 @@ hypertrack-skills/
 
 - **Verify before writing.** Every API field and endpoint must exist in the OpenAPI spec. Every SDK symbol must match the SDK reference or a quickstart. Don't copy from the docs blindly; they have had compile errors.
 - **Snippets compile.** `swift`, `kotlin`, `ts`, `dart`, and `csharp` fences must be complete compilable units (imports + declarations; no top-level statements in Kotlin). Run `just snippets` after touching them. Use fence info `no-check` only for intentionally partial code. Gradle Kotlin DSL goes in `kts` fences, not `kotlin`.
-- **Prefer pointers over copies** for long field lists and payloads. Keep enough in the skill for the common path, and link to the source for the rest.
-- Keep `SKILL.md` around 200 lines. References can be longer but stay focused on one area.
+- **Don't restate the docs.** Before adding a line, check whether one docs page covers it. If it does, link that page with an explicit fetch instruction and add nothing else. Only judgment the docs lack (decisions, rules agents get wrong, traps scattered across pages) goes in, one line each with a link.
+- **Docs are wrong? Fix the docs.** Open a PR in `hypertrack/hypertrack-content` instead of patching around it in the skill. A temporary one-liner is fine until the fix ships, with a TODO to remove it.
+- **Size budget:** `SKILL.md` ≤ 200 lines and all skill Markdown ≤ 300 lines, enforced by `just budget` (part of `just check`). Raising the budget is a deliberate decision in its own commit, not a side effect.
+- **Cut by content, not by file.** When trimming, ask of each line whether a docs page covers it and whether it's judgment. Don't delete or keep whole files wholesale.
 - Placeholders are explicit (`YOUR_PUBLISHABLE_KEY`, `<version>`, `<order_handle>`). Credentials in examples come from environment variables.
 - **Behavior gets a test.** Changes to `scripts/` or `tools/` need a regression test in `tests/`. Snippets with logic beyond API calls (such as webhook verification) get a behavior test there too; compiling isn't enough.
 - `just check` before committing (dprint, script syntax, tests, links, API endpoints). `just snippets` when snippets or SDK versions change.

@@ -6,16 +6,17 @@ A customer with a coding agent should be able to say "integrate HyperTrack into 
 
 ## Principles
 
-- **Orders-first:** The skill teaches the recommended path, backend-managed Orders. Alternatives (on-device orders for offline-first apps, manual tracking intent) are documented with when to use them, not as defaults.
-- **Judgment here, facts at the source:** The skill holds what docs don't give an agent: the model, decisions, invariants, traps, and verification. Volatile facts (fields, payloads, SDK symbols) point to the OpenAPI spec, docs `.md` versions, and SDK references instead of being copied.
-- **Correct by construction:** Every snippet compiles against the latest SDK release and every endpoint exists in the OpenAPI spec. Both are checked by tooling, not by review.
-- **Inspect, then act:** The agent reads the customer's repo first and works on whichever side it's in (mobile or backend). It records shared decisions so the other side matches.
-- **Validate, don't trust:** Each phase ends with a check the agent can run itself (audit script, verification CLI), plus a clear device protocol for the parts only a human with a phone can test.
-- **Platform-aware:** All HyperTrack SDK platforms are covered. Platform details live in references, not in the main skill body.
+- **The docs are the source; the skill routes to them.** For each task, the skill tells the agent which docs page, OpenAPI spec section, SDK reference, or quickstart to fetch, with an explicit instruction ("before writing iOS code, fetch `https://hypertrack.com/docs/install-sdk-ios.md`"). It doesn't restate what those pages say. A copy drifts out of sync and makes the agent trust two sources.
+- **Only judgment the docs don't have.** The skill keeps decisions to settle with the user, rules agents get wrong, and traps scattered across several pages. One line each, with a link. If one docs page covers something, link to that page and don't add a line.
+- **Fix the docs, not the skill.** When the docs are wrong or missing something, fix them in `hypertrack/hypertrack-content`. The skill doesn't carry patched copies. A temporary one-liner is fine until the docs fix ships, with a TODO to remove it.
+- **Small on purpose.** A short `SKILL.md` that the agent reads fully beats a large one it skims. Every line must earn its place. When trimming, cut by content (is it in the docs? is it judgment?), not by file.
+- **Orders-first.** The recommended path is backend-managed Orders. On-device orders are for offline-first apps; manual tracking intent only when asked.
+- **Inspect, then act.** The agent reads the customer's repo first and works on whichever side it's in (mobile or backend). It records shared decisions so the other side matches.
+- **Validate, don't trust.** The agent checks its own work where it can (the build, the API, webhook delivery) and gives a person a clear device checklist for the rest.
 
 ## Success criteria
 
-1. An agent using this skill can take a customer from zero to a working HyperTrack integration in one session.
+1. An agent using this skill can take a customer from zero to a working HyperTrack integration in one session, and it fetches the docs pages the skill points to. This is measured with real agent runs, not assumed.
 2. The integration passes HyperTrack's own integration review criteria.
-3. Common pitfalls (wrong coordinates, missing push, permission timing, leaked secret key, unverified webhooks) are caught before they become production bugs.
-4. The skill stays current with HyperTrack's API and SDK releases, and drift is detected by `just check` / `just snippets`.
+3. Common pitfalls (missing push, permission timing, leaked secret key, unverified webhooks, swapped coordinates) are caught before they become production bugs.
+4. The skill stays small and in sync: its links and API endpoints are checked by `just check`, and it holds no copies of docs content.
