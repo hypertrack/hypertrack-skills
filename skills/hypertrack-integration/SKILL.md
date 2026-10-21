@@ -77,7 +77,7 @@ Before writing the code for a task, fetch its page:
 - Backend: derive order handles from your own IDs so retries are safe. On `409 duplicate_resource`, `GET` the order before deciding what to do. Run a reconciliation job that completes or cancels HyperTrack orders whose work ended in your system. URL-encode handles in paths (`james%40co.com`).
 - Availability set on the server (`work_status`) doesn't currently reach the device, so the SDK won't start collecting location for Nearby. When the device needs to react, set availability in the app.
 - Expo: the HyperTrack config plugin adds native code, so it needs a native build (the prebuild step on the Expo install page); it won't run in Expo Go.
-- Cordova (`cordova-plugin-hypertrack-v3`) isn't supported, even though a docs page exists. Use Ionic Capacitor.
+- Cordova isn't supported (`cordova-plugin-hypertrack` is archived). Use Ionic Capacitor.
 
 ### 4. Verify
 
